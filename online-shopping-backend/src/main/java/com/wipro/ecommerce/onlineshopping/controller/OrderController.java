@@ -1,0 +1,39 @@
+package com.wipro.ecommerce.onlineshopping.controller;
+
+import com.wipro.ecommerce.onlineshopping.entity.Order;
+import com.wipro.ecommerce.onlineshopping.entity.OrderItem;
+import com.wipro.ecommerce.onlineshopping.service.OrderService;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
+
+@RestController
+@RequestMapping("/orders")
+public class OrderController {
+
+    private final OrderService orderService;
+
+    public OrderController(OrderService orderService) {
+        this.orderService = orderService;
+    }
+
+    // POST /api/orders → Place order
+    @PostMapping
+    public ResponseEntity<Order> placeOrder(@RequestParam Long userId,
+                                            @RequestBody List<OrderItem> items) {
+        return ResponseEntity.ok(orderService.placeOrder(userId, items));
+    }
+
+    // GET /api/orders/{userId} → Get user orders
+    @GetMapping("/{userId}")
+    public ResponseEntity<List<Order>> getUserOrders(@PathVariable Long userId) {
+        return ResponseEntity.ok(orderService.getUserOrders(userId));
+    }
+
+    // GET /api/orders (Admin) → Get all orders
+    @GetMapping
+    public ResponseEntity<List<Order>> getAllOrders() {
+        return ResponseEntity.ok(orderService.getAllOrders());
+    }
+}

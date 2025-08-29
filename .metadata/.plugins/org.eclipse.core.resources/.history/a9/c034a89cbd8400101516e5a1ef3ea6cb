@@ -1,0 +1,7 @@
+package com.wipro.ecommerce.onlineshopping.dto;
+
+public class AddToCartRequest {
+    private Long productId;
+    private Integer quantity;
+    // getters & setters
+}

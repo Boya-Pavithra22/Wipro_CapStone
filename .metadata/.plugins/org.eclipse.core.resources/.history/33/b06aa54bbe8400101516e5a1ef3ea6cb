@@ -1,0 +1,39 @@
+package com.wipro.ecommerce.onlineshopping.service;
+
+import com.wipro.ecommerce.onlineshopping.dto.AddToCartRequest;
+import com.wipro.ecommerce.onlineshopping.entity.*;
+import com.wipro.ecommerce.onlineshopping.repository.*;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import java.util.List;
+
+@Service
+public class CartService {
+
+    @Autowired private CartRepository cartRepo;
+    @Autowired private UserRepository userRepo;
+    @Autowired private ProductRepository productRepo;
+
+    public List<Cart> getCartByUser(String email) {
+        User user = userRepo.findByEmail(email).orElseThrow();
+        return cartRepo.findByUserId(user.getId());
+    }
+
+    public Cart addToCart(String email, AddToCartRequest req) {
+        User user = userRepo.findByEmail(email).orElseThrow();
+        Product product = productRepo.findById(req.getProductId()).orElseThrow();
+
+        Cart cart = new Cart();
+        cart.setUser(user);
+        cart.setProduct(product);
+        cart.setQuantity(req.getQuantity());
+
+        return cartRepo.save(cart);
+    }
+
+    public void removeFromCart(String email, Long productId) {
+        User user = userRepo.findByEmail(email).orElseThrow();
+        cartRepo.deleteByUserAndProductId(user, productId);
+    }
+}

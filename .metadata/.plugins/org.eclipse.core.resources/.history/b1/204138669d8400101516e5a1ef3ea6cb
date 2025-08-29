@@ -1,0 +1,5 @@
+package com.wipro.ecommerce.onlineshopping.entity;
+
+public class Cart {
+
+}

@@ -1,0 +1,30 @@
+package com.wipro.ecommerce.onlineshopping.controller;
+
+import com.wipro.ecommerce.onlineshopping.entity.Payment;
+import com.wipro.ecommerce.onlineshopping.service.PaymentService;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+
+@RestController
+@RequestMapping("/payments")
+public class PaymentController {
+
+    private final PaymentService paymentService;
+    public PaymentController(PaymentService paymentService) {
+        this.paymentService = paymentService;
+    }
+
+    // Create Payment for an Order
+    @PostMapping("/{orderId}")
+    public ResponseEntity<Payment> createPayment(@PathVariable Long orderId) {
+        return ResponseEntity.ok(paymentService.createPayment(orderId));
+    }
+
+    // Update Payment Status (e.g., SUCCESS or FAILED)
+    @PutMapping("/{transactionId}")
+    public ResponseEntity<Payment> updatePaymentStatus(
+            @PathVariable String transactionId,
+            @RequestParam Payment.PaymentStatus status) {
+        return ResponseEntity.ok(paymentService.updatePaymentStatus(transactionId, status));
+    }
+}

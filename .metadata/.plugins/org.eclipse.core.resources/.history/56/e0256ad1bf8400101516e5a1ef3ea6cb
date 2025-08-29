@@ -1,0 +1,27 @@
+package com.wipro.ecommerce.onlineshopping.controller;
+
+import com.wipro.ecommerce.onlineshopping.entity.Order;
+import com.wipro.ecommerce.onlineshopping.service.OrderService;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
+
+@RestController
+@RequestMapping("/api/orders")
+public class OrderController {
+
+    @Autowired private OrderService orderService;
+
+    @PostMapping("/place")
+    public Order place(@AuthenticationPrincipal UserDetails user) {
+        return orderService.placeOrder(user.getUsername());
+    }
+
+    @GetMapping
+    public List<Order> myOrders(@AuthenticationPrincipal UserDetails user) {
+        return orderService.getOrders(user.getUsername());
+    }
+}

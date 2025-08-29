@@ -1,0 +1,8 @@
+package com.wipro.ecommerce.onlineshopping.entity;
+
+
+public enum Role {
+	CUSTOMER, ADMIN
+}
+
+

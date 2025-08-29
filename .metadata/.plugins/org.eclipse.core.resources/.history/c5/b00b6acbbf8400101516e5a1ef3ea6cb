@@ -1,0 +1,48 @@
+package com.wipro.ecommerce.onlineshopping.service;
+
+import com.wipro.ecommerce.onlineshopping.entity.*;
+import com.wipro.ecommerce.onlineshopping.repository.*;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import java.math.BigDecimal;
+import java.util.List;
+
+@Service
+public class OrderService {
+
+    @Autowired private OrderRepository orderRepo;
+    @Autowired private CartRepository cartRepo;
+    @Autowired private UserRepository userRepo;
+
+    public Order placeOrder(String email) {
+        User user = userRepo.findByEmail(email).orElseThrow();
+        List<Cart> cartItems = cartRepo.findByUser(user);
+
+        BigDecimal total = BigDecimal.ZERO;
+        Order order = new Order();
+        order.setUser(user);
+
+        for (Cart c : cartItems) {
+            OrderItem item = new OrderItem();
+            item.setOrder(order);
+            item.setProduct(c.getProduct());
+            item.setQuantity(c.getQuantity());
+            item.setPrice(c.getProduct().getPrice().multiply(BigDecimal.valueOf(c.getQuantity())));
+            total = total.add(item.getPrice());
+            order.getItems().add(item);
+        }
+
+        order.setTotalAmount(total);
+        order.setStatus("PENDING");
+        orderRepo.save(order);
+
+        cartRepo.deleteAll(cartItems); // clear cart
+        return order;
+    }
+
+    public List<Order> getOrders(String email) {
+        User user = userRepo.findByEmail(email).orElseThrow();
+        return orderRepo.findByUser(user);
+    }
+}

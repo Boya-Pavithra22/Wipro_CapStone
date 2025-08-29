@@ -1,0 +1,10 @@
+package com.wipro.ecommerce.onlineshopping.repository;
+
+import com.wipro.ecommerce.onlineshopping.entity.Payment;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.stereotype.Repository;
+
+@Repository
+public interface PaymentRepository extends JpaRepository<Payment, Long> {
+    // You can extend later with custom queries if needed
+}

@@ -1,0 +1,34 @@
+package com.wipro.ecommerce.onlineshopping.controller;
+
+import com.wipro.ecommerce.onlineshopping.dto.AddToCartRequest;
+import com.wipro.ecommerce.onlineshopping.entity.Cart;
+import com.wipro.ecommerce.onlineshopping.service.CartService;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
+
+@RestController
+@RequestMapping("/api/cart")
+public class CartController {
+
+    @Autowired private CartService cartService;
+
+    @GetMapping
+    public List<Cart> getCart(@AuthenticationPrincipal UserDetails user) {
+        return cartService.getCartByUser(user.getUsername());
+    }
+
+    @PostMapping
+    public Cart addToCart(@AuthenticationPrincipal UserDetails user, @RequestBody AddToCartRequest req) {
+        return cartService.addToCart(user.getUsername(), req);
+    }
+
+    @DeleteMapping("/{productId}")
+    public void remove(@AuthenticationPrincipal UserDetails user, @PathVariable Long productId) {
+        cartService.removeFromCart(user.getUsername(), productId);
+    }
+}
+

@@ -1,0 +1,28 @@
+package com.wipro.ecommerce.onlineshopping.service;
+
+import com.wipro.ecommerce.onlineshopping.entity.Order;
+import com.wipro.ecommerce.onlineshopping.entity.Payment;
+import com.wipro.ecommerce.onlineshopping.repository.OrderRepository;
+import com.wipro.ecommerce.onlineshopping.repository.PaymentRepository;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+@Service
+public class PaymentService {
+
+    @Autowired private PaymentRepository paymentRepo;
+    @Autowired private OrderRepository orderRepo;
+
+    public Payment pay(Long orderId, String method) {
+        Order order = orderRepo.findById(orderId).orElseThrow();
+
+        Payment payment = new Payment();
+        payment.setOrder(order);
+        payment.setMethod(method);
+        payment.setStatus("SUCCESS");
+
+        order.setStatus("CONFIRMED");
+        orderRepo.save(order);
+        return paymentRepo.save(payment);
+    }
+}

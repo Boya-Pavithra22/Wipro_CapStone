@@ -1,0 +1,77 @@
+package com.wipro.ecommerce.onlineshopping.security;
+
+import jakarta.servlet.http.HttpServletResponse;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.*;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
+import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.web.cors.CorsConfiguration;
+
+import java.util.List;
+
+@Configuration
+public class SecurityConfig {
+
+    @Autowired
+    private JwtAuthenticationFilter jwtFilter;
+
+    @Bean
+    public AuthenticationManager authenticationManager(AuthenticationConfiguration config) throws Exception {
+        System.out.println("🔧 Initializing AuthenticationManager");
+        return config.getAuthenticationManager();
+    }
+
+    @Bean
+    public PasswordEncoder passwordEncoder() {
+        System.out.println("🔧 Using BCryptPasswordEncoder for passwords");
+        return new BCryptPasswordEncoder();
+    }
+
+    @Bean
+    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+        System.out.println("🔧 Building SecurityFilterChain...");
+
+        http
+            .cors(cors -> cors.configurationSource(request -> {
+                System.out.println("🌐 Applying CORS config for request: " + request.getRequestURI());
+                CorsConfiguration config = new CorsConfiguration();
+                config.setAllowedOrigins(List.of("http://localhost:3000")); // React dev server
+                config.setAllowedMethods(List.of("GET","POST","PUT","DELETE","OPTIONS"));
+                config.setAllowedHeaders(List.of("*"));
+                config.setAllowCredentials(true);
+                return config;
+            }))
+            .csrf(csrf -> {
+                System.out.println("⚠️ CSRF disabled");
+                csrf.disable();
+            })
+            .authorizeHttpRequests(auth -> {
+                System.out.println("🔐 Configuring endpoint access rules...");
+                auth
+                    .requestMatchers("/auth/**").permitAll()   // ✅ FIX: allow register & login (without /api prefix)
+                    .requestMatchers("/api/admin/**").hasRole("ADMIN")
+                    .anyRequest().authenticated();
+            })
+            .exceptionHandling(ex -> ex
+                .authenticationEntryPoint((req, res, e) -> {
+                    System.out.println("🚨 Authentication failed for URI: " + req.getRequestURI() + " | " + e.getMessage());
+                    res.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Unauthorized: " + e.getMessage());
+                })
+                .accessDeniedHandler((req, res, e) -> {
+                    System.out.println("🚫 Access denied for URI: " + req.getRequestURI() + " | " + e.getMessage());
+                    res.sendError(HttpServletResponse.SC_FORBIDDEN, "Forbidden: " + e.getMessage());
+                })
+            );
+
+        System.out.println("🛡️ Adding JwtAuthenticationFilter before UsernamePasswordAuthenticationFilter");
+        http.addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
+
+        System.out.println("✅ SecurityFilterChain built successfully");
+        return http.build();
+    }
+}

@@ -1,0 +1,45 @@
+package com.wipro.ecommerce.onlineshopping.service;
+
+import com.wipro.ecommerce.onlineshopping.entity.Order;
+import com.wipro.ecommerce.onlineshopping.entity.Payment;
+import com.wipro.ecommerce.onlineshopping.repository.PaymentRepository;
+import com.wipro.ecommerce.onlineshopping.repository.OrderRepository;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.util.Optional;
+import java.util.UUID;
+
+@Service
+public class PaymentService {
+
+    private final PaymentRepository paymentRepo;
+    private final OrderRepository orderRepo;
+
+    public PaymentService(PaymentRepository paymentRepo, OrderRepository orderRepo) {
+        this.paymentRepo = paymentRepo;
+        this.orderRepo = orderRepo;
+    }
+
+    @Transactional
+    public Payment createPayment(Long orderId) {
+        Order order = orderRepo.findById(orderId)
+                .orElseThrow(() -> new RuntimeException("Order not found"));
+
+        // Generate a fake transaction ID for now
+        String transactionId = UUID.randomUUID().toString();
+
+        Payment payment = new Payment(order, transactionId);
+        payment.setPaymentStatus(Payment.PaymentStatus.PENDING);
+        return paymentRepo.save(payment);
+    }
+
+    @Transactional
+    public Payment updatePaymentStatus(String transactionId, Payment.PaymentStatus status) {
+        Payment payment = paymentRepo.findByTransactionId(transactionId)
+                .orElseThrow(() -> new RuntimeException("Payment not found"));
+
+        payment.setPaymentStatus(status);
+        return paymentRepo.save(payment);
+    }
+}

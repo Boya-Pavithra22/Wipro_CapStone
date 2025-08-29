@@ -1,0 +1,5 @@
+package com.wipro.ecommerce.onlineshopping.service;
+
+public class PaymentService {
+
+}
