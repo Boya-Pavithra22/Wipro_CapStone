@@ -103,3 +103,30 @@
     opacity: 1;
   }
 }
+
+/* Toast Notification */
+.toast {
+  position: fixed;
+  bottom: -50px; /* start hidden below */
+  left: 50%;
+  transform: translateX(-50%);
+  background: #4BB543; /* green success */
+  color: white;
+  padding: 15px 25px;
+  border-radius: 25px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+  animation: slideUpToast 0.5s forwards, fadeOutToast 0.5s 2.5s forwards;
+  z-index: 1000;
+}
+
+/* Toast slide up animation */
+@keyframes slideUpToast {
+  from { bottom: -50px; opacity: 0; }
+  to { bottom: 30px; opacity: 1; }
+}
+
+/* Toast fade out animation */
+@keyframes fadeOutToast {
+  from { opacity: 1; }
+  to { opacity: 0; }
+}

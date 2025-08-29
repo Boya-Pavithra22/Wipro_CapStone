@@ -15,11 +15,13 @@ const Login = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
+      alert("came in try ???")
       const res = await api.post("/auth/login", { email, password });
       login(res.data.token);
+    alert(res.data.token)
       navigate("/");
     } catch (err) {
-      alert("Invalid credentials");
+      alert("Invalid credentials Anil");
     }
   };
 
