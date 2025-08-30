@@ -1,0 +1,25 @@
+package com.wipro.ecommerce.onlineshopping.repository;
+
+import com.wipro.ecommerce.onlineshopping.entity.Product;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+
+import java.util.List;
+
+public interface ProductRepository extends JpaRepository<Product, Long> {
+
+    Page<Product> findByCategory(String category, Pageable pageable);
+
+    @Query("SELECT DISTINCT p.category FROM Product p")
+    List<String> findDistinctCategories();
+    
+    List<String> findDistinctCategoryNames();
+
+    
+    
+    List<Product> findByCategory_Name(String categoryName);
+
+
+}

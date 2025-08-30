@@ -1,0 +1,32 @@
+package com.wipro.ecommerce.onlineshopping.service;
+
+import com.wipro.ecommerce.onlineshopping.entity.Product;
+import com.wipro.ecommerce.onlineshopping.repository.ProductRepository;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.stereotype.Service;
+
+import java.util.List;
+
+@Service
+public class ProductService {
+
+    @Autowired
+    private ProductRepository productRepo;
+
+    public Page<Product> getAllProducts(Pageable pageable) {
+        return productRepo.findAll(pageable);
+    }	
+
+    
+    
+    public List<Product> getProductsByCategory(String categoryName) {
+        return productRepo.findByCategory_Name(categoryName);
+    }
+
+
+    public List<String> getAllCategories() {
+        return productRepository.findDistinctCategoryNames();
+    }
+}

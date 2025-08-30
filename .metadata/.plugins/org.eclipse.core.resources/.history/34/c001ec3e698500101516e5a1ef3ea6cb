@@ -1,0 +1,15 @@
+package com.wipro.ecommerce.onlineshopping.dto;
+
+public class JwtResponse {
+    private String token;
+    private String role; // add role
+
+    public JwtResponse(String token, String role) {
+        this.token = token;
+        this.role = role;
+    }
+
+    // getters and setters
+    public String getToken() { return token; }
+    public String getRole() { return role; }
+}

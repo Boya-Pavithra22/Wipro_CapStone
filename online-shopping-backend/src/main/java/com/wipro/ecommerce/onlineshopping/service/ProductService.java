@@ -3,10 +3,11 @@ package com.wipro.ecommerce.onlineshopping.service;
 import com.wipro.ecommerce.onlineshopping.entity.Product;
 import com.wipro.ecommerce.onlineshopping.repository.ProductRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.Optional;
 
 @Service
 public class ProductService {
@@ -14,19 +15,23 @@ public class ProductService {
     @Autowired
     private ProductRepository productRepo;
 
-    public List<Product> getAllProducts() {
-        return productRepo.findAll();
+    public Page<Product> getAllProducts(Pageable pageable) {
+        return productRepo.findAll(pageable);
+    }	
+
+    
+    
+    public List<Product> getProductsByCategory(String categoryName) {
+        return productRepo.findByCategory_Name(categoryName);
     }
 
-    public Optional<Product> getProductById(Long id) {
-        return productRepo.findById(id);
+
+    public List<String> getAllCategories() {
+        return productRepo.findDistinctCategoryNames();
+    }
+    
+    public Product getProductById(Long id) {
+        return productRepo.findById(id).orElse(null);
     }
 
-    public Product saveProduct(Product product) {
-        return productRepo.save(product);
-    }
-
-    public void deleteProduct(Long id) {
-        productRepo.deleteById(id);
-    }
 }

@@ -1,0 +1,73 @@
+package com.wipro.ecommerce.onlineshopping.controller;
+
+import com.wipro.ecommerce.onlineshopping.dto.*;
+import com.wipro.ecommerce.onlineshopping.entity.User;
+import com.wipro.ecommerce.onlineshopping.repository.UserRepository;
+import com.wipro.ecommerce.onlineshopping.security.JwtUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.authentication.*;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.core.Authentication;
+import org.springframework.web.bind.annotation.*;
+
+@RestController
+@RequestMapping("/auth")
+public class AuthController {
+
+    @Autowired private AuthenticationManager authManager;
+    @Autowired private UserRepository userRepo;
+    @Autowired private PasswordEncoder passwordEncoder;
+    @Autowired private JwtUtils jwtUtils;
+
+    @PostMapping("/register-customer")
+    public ResponseEntity<?> register(@RequestBody RegisterRequest req) {
+        if (userRepo.findByEmail(req.getEmail()).isPresent()) {
+            return ResponseEntity.badRequest().body("Email already exists");
+        }
+
+        User user = new User();
+        user.setName(req.getName());
+        user.setEmail(req.getEmail());
+        user.setPassword(passwordEncoder.encode(req.getPassword()));
+        user.setAddress(req.getAddress());
+        user.setPhone(req.getPhoneNumber());
+        user.setRole(User.Role.CUSTOMER); 
+
+        userRepo.save(user);
+        return ResponseEntity.ok("User registered successfully");
+    }
+    
+    @PostMapping("/register-admin")
+    public ResponseEntity<?> registerAdmin(@RequestBody RegisterRequest req) {
+        if (userRepo.findByEmail(req.getEmail()).isPresent()) {
+            return ResponseEntity.badRequest().body("Email already exists");
+        }
+
+        User user = new User();
+        user.setName(req.getName());
+        user.setEmail(req.getEmail());
+        user.setPassword(passwordEncoder.encode(req.getPassword()));
+        user.setRole(User.Role.ADMIN);
+
+        userRepo.save(user);
+        return ResponseEntity.ok("Admin registered successfully");
+    }
+
+    @PostMapping("/login")
+    public ResponseEntity<?> login(@RequestBody LoginRequest req) {
+        Authentication authentication = authManager.authenticate(
+                new UsernamePasswordAuthenticationToken(req.getEmail(), req.getPassword())
+        );
+
+        // Generate JWT
+        String jwt = jwtUtils.generateToken(req.getEmail());
+
+        // Fetch user to get role
+        User user = userRepo.findByEmail(req.getEmail())
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        // Return token + role
+        return ResponseEntity.ok(new JwtResponse(jwt, user.getRole().name()));
+    }
+}

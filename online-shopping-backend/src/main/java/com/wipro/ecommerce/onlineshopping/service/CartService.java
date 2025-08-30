@@ -24,11 +24,15 @@ public class CartService {
     }
 
     public Cart addItem(Long userId, Long productId, Integer quantity) {
-        User user = userRepo.findById(userId)
-                .orElseThrow(() -> new RuntimeException("User not found"));
-        Product product = productRepo.findById(productId)
-                .orElseThrow(() -> new RuntimeException("Product not found"));
+        Cart existing = cartRepo.findByUserIdAndProductId(userId, productId);
+        if (existing != null) {
+            existing.setQuantity(existing.getQuantity() + quantity);
+            return cartRepo.save(existing);
+        }
 
+        // Else create new cart item
+        User user = userRepo.findById(userId).orElseThrow();
+        Product product = productRepo.findById(productId).orElseThrow();
         Cart cart = new Cart(user, product, quantity);
         return cartRepo.save(cart);
     }
@@ -45,4 +49,12 @@ public class CartService {
         }
         cartRepo.deleteById(id);
     }
+    
+    public Cart updateQuantity(Long cartId, Integer quantity) {
+        Cart cartItem = cartRepo.findById(cartId)
+                .orElseThrow(() -> new RuntimeException("Cart item not found"));
+        cartItem.setQuantity(quantity);
+        return cartRepo.save(cartItem);
+    }
+
 }

@@ -1,24 +1,32 @@
-import React, { createContext, useState, useEffect } from "react";
+import React, { createContext, useState } from "react";
 
 export const AuthContext = createContext();
 
 export const AuthProvider = ({ children }) => {
-  const [user, setUser] = useState(null);
-
-  useEffect(() => {
+  // Load user from localStorage for persistent login
+  const [user, setUser] = useState(() => {
     const savedUser = localStorage.getItem("user");
-    if (savedUser) setUser(JSON.parse(savedUser));
-  }, []);
+    return savedUser ? JSON.parse(savedUser) : null;
+  });
 
-  const login = (data) => {
-    setUser(data);
-    localStorage.setItem("user", JSON.stringify(data));
-  };
+  const login = ({ token, role, name, email, userId }) => {
+  const userData = { token, role, name, email, userId };
+  
+  // Save user to localStorage
+  localStorage.setItem("user", JSON.stringify(userData));
+  
+  // Set user state
+  setUser(userData);
+
+  // Show alerts
+  alert(`User ID: ${userData.userId}`);
+  alert(`Email: ${userData.email}`);
+  alert(`Token: ${userData.token}`);
+};
 
   const logout = () => {
-    setUser(null);
     localStorage.removeItem("user");
-    localStorage.removeItem("token");
+    setUser(null);
   };
 
   return (

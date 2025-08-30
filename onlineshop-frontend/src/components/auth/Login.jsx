@@ -1,10 +1,10 @@
 import React, { useState, useContext } from "react";
 import { TextField, Button, Card, Typography } from "@mui/material";
 import { motion } from "framer-motion";
-import { AuthContext } from "../context/AuthContext";
+import { AuthContext } from "../../context/AuthContext";
 import { useNavigate } from "react-router-dom";
-import api from "../services/api";
-import "../components/css/Login.css"
+import api from "../../services/api";
+import "../css/Login.css";
 
 const Login = () => {
   const [email, setEmail] = useState("");
@@ -15,13 +15,24 @@ const Login = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      alert("came in try ???")
       const res = await api.post("/auth/login", { email, password });
-      login(res.data.token);
-    alert(res.data.token)
-      navigate("/");
+
+      // Save token + role + name + email
+      login({
+        token: res.data.token,
+        role: res.data.role,
+        name: res.data.name,
+        email: res.data.email,
+        userId : res.data.userId,
+      });
+
+      // Small delay so Navbar sees updated user
+      setTimeout(() => {
+        if (res.data.role === "ADMIN") navigate("/admin/dashboard");
+        else navigate("/customer/dashboard");
+      }, 100);
     } catch (err) {
-      alert("Invalid credentials Anil");
+      alert("Invalid credentials");
     }
   };
 

@@ -1,0 +1,48 @@
+package com.wipro.ecommerce.onlineshopping.service;
+
+import com.wipro.ecommerce.onlineshopping.entity.Cart;
+import com.wipro.ecommerce.onlineshopping.entity.Product;
+import com.wipro.ecommerce.onlineshopping.entity.User;
+import com.wipro.ecommerce.onlineshopping.repository.CartRepository;
+import com.wipro.ecommerce.onlineshopping.repository.ProductRepository;
+import com.wipro.ecommerce.onlineshopping.repository.UserRepository;
+import org.springframework.stereotype.Service;
+
+import java.util.List;
+
+@Service
+public class CartService {
+
+    private final CartRepository cartRepo;
+    private final UserRepository userRepo;
+    private final ProductRepository productRepo;
+
+    public CartService(CartRepository cartRepo, UserRepository userRepo, ProductRepository productRepo) {
+        this.cartRepo = cartRepo;
+        this.userRepo = userRepo;
+        this.productRepo = productRepo;
+    }
+
+    public Cart addItem(Long userId, Long productId, Integer quantity) {
+        User user = userRepo.findById(userId)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+        Product product = productRepo.findById(productId)
+                .orElseThrow(() -> new RuntimeException("Product not found"));
+
+        Cart cart = new Cart(user, product, quantity);
+        return cartRepo.save(cart);
+    }
+
+    public List<Cart> getUserCart(Long userId) {
+        User user = userRepo.findById(userId)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+        return cartRepo.findByUser(user);
+    }
+
+    public void removeItem(Long id) {
+        if (!cartRepo.existsById(id)) {
+            throw new RuntimeException("Cart item not found");
+        }
+        cartRepo.deleteById(id);
+    }
+}

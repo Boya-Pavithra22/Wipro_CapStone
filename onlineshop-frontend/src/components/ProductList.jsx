@@ -1,46 +1,74 @@
 import React, { useEffect, useState, useContext } from "react";
-import API from "../services/api";
+import { useNavigate, useParams } from "react-router-dom";
+import api from "../services/api";
 import { AuthContext } from "../context/AuthContext";
-import { useNavigate } from "react-router-dom";
+import { CartContext } from "../components/CartContext";
+import "../components/css/ProductList.css"
 
-export default function ProductList() {
+const ProductList = () => {
   const [products, setProducts] = useState([]);
-  const { user } = useContext(AuthContext);
+  const { categoryName } = useParams();
   const navigate = useNavigate();
 
-  useEffect(() => {
-    API.get("/products").then((res) => setProducts(res.data));
-  }, []);
+  const { user } = useContext(AuthContext);
+  const { addItem } = useContext(CartContext);
 
-  const addToCart = async (productId) => {
+  useEffect(() => {
+    const fetchProducts = async () => {
+      try {
+        let res;
+        if (categoryName) {
+          res = await api.get(`/products/category/${categoryName}`);
+          setProducts(res.data);
+        } else {
+          res = await api.get(`/products?page=0&size=12`);
+          setProducts(res.data.content);
+        }
+      } catch (err) {
+        console.error("Error fetching products:", err);
+      }
+    };
+    fetchProducts();
+  }, [categoryName]);
+
+  const handleAddToCart = async (productId) => {
     if (!user) {
-      alert("Login first");
-      navigate("/login");
+      alert("Please login first");
       return;
     }
-    await API.post("/cart", { userId: user.userId, productId, quantity: 1 });
-    alert("Added to cart");
+    try {
+      await addItem(productId); // updates cart and count automatically
+      alert("Added to cart");
+    } catch (err) {
+      console.error("Failed to add to cart:", err);
+      alert("Failed to add to cart");
+    }
   };
 
   return (
-    <div className="container mt-4">
-      <h3>Products</h3>
-      <div className="row">
-        {products.map((p) => (
-          <div key={p.id} className="col-md-4">
-            <div className="card mb-3">
-              <div className="card-body">
-                <h5>{p.name}</h5>
-                <p>{p.description}</p>
-                <p>₹ {p.price}</p>
-                <button className="btn btn-primary" onClick={() => addToCart(p.id)}>
-                  Add to Cart
-                </button>
-              </div>
-            </div>
+    <div className="product-grid">
+      {products.map((product) => (
+        <div key={product.id} className="product-card">
+          <img
+            src={product.imageUrl}
+            alt={product.name}
+            className="product-image"
+            onClick={() => navigate(`/products/${product.id}`)}
+          />
+          <div className="product-info">
+            <h5 className="product-name">{product.name}</h5>
+            <p className="product-price">₹{product.price}</p>
+            <button
+              onClick={() => handleAddToCart(product.id)}
+              className="add-btn"
+            >
+              🛒 Add to Bag
+            </button>
           </div>
-        ))}
-      </div>
+        </div>
+      ))}
     </div>
   );
-}
+};
+
+export default ProductList;

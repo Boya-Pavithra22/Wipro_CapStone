@@ -60,7 +60,16 @@ public class AuthController {
                 new UsernamePasswordAuthenticationToken(req.getEmail(), req.getPassword())
         );
 
+        // Generate JWT
         String jwt = jwtUtils.generateToken(req.getEmail());
-        return ResponseEntity.ok(new JwtResponse(jwt));
+
+        // Fetch user to get role, name, email
+        User user = userRepo.findByEmail(req.getEmail())
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        // Return token + role + name + email
+        return ResponseEntity.ok(
+                new JwtResponse(jwt, user.getRole().name(), user.getName(), user.getEmail(), user.getId())
+        );
     }
 }

@@ -1,0 +1,26 @@
+{
+  "categories": ["Men", "Women", "Kids", "Footwear", "Accessories"],
+  "products": [
+    {
+      "id": 1,
+      "name": "Casual Shirt",
+      "price": 999,
+      "image": "https://via.placeholder.com/150",
+      "category": "Men"
+    },
+    {
+      "id": 2,
+      "name": "Sneakers",
+      "price": 2499,
+      "image": "https://via.placeholder.com/150",
+      "category": "Footwear"
+    },
+    {
+      "id": 3,
+      "name": "Handbag",
+      "price": 1999,
+      "image": "https://via.placeholder.com/150",
+      "category": "Women"
+    }
+  ]
+}

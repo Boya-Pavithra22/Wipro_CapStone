@@ -1,0 +1,25 @@
+.admin-dashboard {
+  min-height: 100vh;
+}
+
+.sidebar {
+  width: 220px;
+  min-height: 100vh;
+}
+
+.admin-dashboard .container {
+  margin-left: 220px;
+}
+
+.table td, .table th {
+  vertical-align: middle;
+}
+
+.alert {
+  animation: fadeIn 0.5s ease;
+}
+
+@keyframes fadeIn {
+  0% { opacity: 0; transform: translateY(-10px);}
+  100% { opacity: 1; transform: translateY(0);}
+}
