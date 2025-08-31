@@ -6,13 +6,15 @@ public class JwtResponse {
     private String name;
     private String email;
     private Long userId;
+    private String address;
 
-    public JwtResponse(String token, String role,String name,String email,Long userId) {
+    public JwtResponse(String token, String role,String name,String email,Long userId,String address) {
         this.token = token;
         this.role = role;
         this.name = name;
         this.email = email;
         this.userId = userId;
+        this.address= address;
         
     }
 
@@ -34,6 +36,14 @@ public class JwtResponse {
 
 	public void setUserId(Long userId) {
 		this.userId = userId;
+	}
+
+	public String getAddress() {
+		return address;
+	}
+
+	public void setAddress(String address) {
+		this.address = address;
 	}
     
     

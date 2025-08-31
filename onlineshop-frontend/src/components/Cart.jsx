@@ -9,22 +9,16 @@ const Cart = () => {
   const { user } = useContext(AuthContext);
   const navigate = useNavigate();
 
-  // Calculate total price dynamically
   const totalPrice = cart.reduce(
     (sum, item) => sum + item.product.price * item.quantity,
     0
   );
 
-  const handleRemove = async (cartId) => {
-    await removeItem(cartId);
-  };
+  const handleRemove = async (cartId) => await removeItem(cartId);
 
   const handleQuantityChange = async (cartId, newQty) => {
     try {
-      // Send PUT request to update quantity
       await api.put(`/cart/${cartId}?quantity=${newQty}`);
-      
-      // Refresh cart and re-render
       await fetchCart();
     } catch (err) {
       console.error("Failed to update quantity:", err);
@@ -37,47 +31,78 @@ const Cart = () => {
       alert("Please login first");
       return;
     }
-    navigate(`/orders`);
+    navigate("/checkout");
   };
 
-  if (!cart.length) return <p style={{ margin: 20 }}>Your cart is empty</p>;
+  if (!cart.length)
+    return (
+      <div
+        style={{
+          textAlign: "center",
+          marginTop: 50,
+          padding: 20,
+        }}
+      >
+        <p style={{ fontSize: 48, margin: "20px 0" }}>😢</p>
+        <h2>Your cart is empty!</h2>
+        <p>Looks like you haven't added any products yet.</p>
+        <button
+          onClick={() => navigate("/products")}
+          style={{
+            marginTop: 20,
+            padding: "10px 20px",
+            backgroundColor: "#ff3e6c",
+            color: "#fff",
+            border: "none",
+            borderRadius: 6,
+            cursor: "pointer",
+            fontWeight: "bold",
+          }}
+        >
+          Shop Products
+        </button>
+      </div>
+    );
 
   return (
     <div style={{ maxWidth: 1200, margin: "20px auto", padding: "0 20px" }}>
       <h2 style={{ marginBottom: 20 }}>My Bag ({cart.length} items)</h2>
 
-      {cart.map((item) => (
-        <div
-          key={item.id}
-          style={{
-            display: "flex",
-            borderBottom: "1px solid #eee",
-            padding: "15px 0",
-            alignItems: "center",
-            gap: 20,
-          }}
-        >
-          {/* Product Image */}
-          <img
-            src={item.product.imageUrl}
-            alt={item.product.name}
-            style={{ width: 120, height: 120, objectFit: "cover", borderRadius: 8 }}
-          />
-
-          {/* Product Info */}
-          <div style={{ flex: 1 }}>
-            <p style={{ fontSize: 14, color: "#888" }}>{item.product.brand || "Brand"}</p>
-            <p style={{ fontSize: 16, fontWeight: "bold", margin: "5px 0" }}>
+      {/* Horizontal scroll container */}
+      <div
+        style={{
+          display: "flex",
+          gap: 20,
+          overflowX: "auto",
+          paddingBottom: 10,
+        }}
+      >
+        {cart.map((item) => (
+          <div
+            key={item.id}
+            style={{
+              minWidth: 300,
+              border: "1px solid #eee",
+              borderRadius: 8,
+              padding: 15,
+              flexShrink: 0,
+              display: "flex",
+              flexDirection: "column",
+              alignItems: "center",
+              background: "#fff",
+            }}
+          >
+            <img
+              src={item.product.imageUrl}
+              alt={item.product.name}
+              style={{ width: 150, height: 150, objectFit: "cover", borderRadius: 8 }}
+            />
+            <p style={{ fontSize: 16, fontWeight: "bold", margin: "10px 0 5px" }}>
               {item.product.name}
             </p>
-
-            {/* Size */}
-            {item.size && (
-              <p style={{ fontSize: 14, color: "#555" }}>Size: {item.size}</p>
-            )}
-
-            {/* Price */}
-            <p style={{ marginTop: 8, fontSize: 16, fontWeight: "bold" }}>
+            <p style={{ fontSize: 14, color: "#888" }}>{item.product.brand || "Brand"}</p>
+            {item.size && <p style={{ fontSize: 14 }}>Size: {item.size}</p>}
+            <p style={{ fontWeight: "bold", marginTop: 5 }}>
               ₹{item.product.price * item.quantity}{" "}
               <span style={{ fontSize: 14, color: "#888", marginLeft: 5 }}>
                 (₹{item.product.price} × {item.quantity})
@@ -101,7 +126,6 @@ const Cart = () => {
               </select>
             </div>
 
-            {/* Remove Button */}
             <button
               onClick={() => handleRemove(item.id)}
               style={{
@@ -116,8 +140,8 @@ const Cart = () => {
               Remove
             </button>
           </div>
-        </div>
-      ))}
+        ))}
+      </div>
 
       {/* Total & Place Order */}
       <div

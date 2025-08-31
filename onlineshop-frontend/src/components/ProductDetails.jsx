@@ -9,22 +9,23 @@ const ProductDetails = () => {
   const [product, setProduct] = useState(null);
   const [selectedImage, setSelectedImage] = useState(null);
   const [selectedSize, setSelectedSize] = useState(null);
+  const [pincode, setPincode] = useState("");
+  const [showAnimation, setShowAnimation] = useState(false);
 
   const { user } = useContext(AuthContext);
-  const { addItem } = useContext(CartContext); // get addItem function
+  const { addItem } = useContext(CartContext);
 
   useEffect(() => {
     api.get(`/products/${id}`)
       .then(res => {
         setProduct(res.data);
-        setSelectedImage(res.data.imageUrl); // default main image
+        setSelectedImage(res.data.imageUrl);
       })
       .catch(console.error);
   }, [id]);
 
   if (!product) return <p>Loading...</p>;
 
-  // Handler for Add to Bag
   const handleAddToCart = async () => {
     if (!user) {
       alert("Please login first");
@@ -32,12 +33,22 @@ const ProductDetails = () => {
     }
 
     try {
-      await addItem(product.id, 1); // add 1 quantity by default
+      await addItem(product.id, 1);
       alert(`Added to cart!\nUser ID: ${user.userId}\nProduct ID: ${product.id}\nQuantity: 1`);
     } catch (err) {
       console.error("Failed to add to cart:", err);
       alert("Failed to add to cart");
     }
+  };
+
+  const handleCheckDelivery = () => {
+    if (!pincode) {
+      alert("Please enter a pincode");
+      return;
+    }
+    // Show delivery animation
+    setShowAnimation(true);
+    setTimeout(() => setShowAnimation(false), 3000);
   };
 
   return (
@@ -50,8 +61,6 @@ const ProductDetails = () => {
           alt={product.name} 
           style={{ width: "100%", height: 500, objectFit: "cover", borderRadius: 8 }} 
         />
-        
-        {/* Thumbnails */}
         <div style={{ display: "flex", gap: 10, marginTop: 15 }}>
           {[product.imageUrl, ...(product.images || [])].map((img, idx) => (
             <img 
@@ -74,7 +83,7 @@ const ProductDetails = () => {
 
       {/* RIGHT: Product details */}
       <div style={{ flex: 1 }}>
-        <h2 style={{ fontSize: 24, fontWeight: "bold" }}>{product.brand || "Brand Name"}</h2>
+        <h2 style={{ fontSize: 24, fontWeight: "bold" }}>{product.description || "Brand Name"}</h2>
         <p style={{ fontSize: 18, color: "#444", marginBottom: 5 }}>{product.name}</p>
         <p style={{ margin: "8px 0", color: "#555" }}>
           ⭐ {product.rating || "4.0"} | {product.reviewsCount || "100+ Ratings"}
@@ -92,6 +101,17 @@ const ProductDetails = () => {
               </span>
             </>
           )}
+
+          {/* Stock Availability */}
+          <p
+            style={{
+              fontWeight: "bold",
+              color: product.stock <= 5 ? "red" : "green",
+              marginTop: 5
+            }}
+          >
+            {product.stock <= 5 ? "Few Left!" : "In Stock"}
+          </p>
         </div>
 
         {product.sizes && (
@@ -120,7 +140,7 @@ const ProductDetails = () => {
         {/* Actions */}
         <div style={{ marginTop: 20, display: "flex", gap: 15 }}>
           <button 
-            onClick={handleAddToCart} // <-- Add to cart
+            onClick={handleAddToCart} 
             style={{ 
               flex: 1, 
               padding: "14px 20px", 
@@ -157,16 +177,28 @@ const ProductDetails = () => {
           Sold by: <strong>{product.seller || "Default Seller"}</strong>
         </p>
 
+        {/* Delivery Pincode */}
         <div style={{ marginTop: 20 }}>
           <h4>Delivery Options</h4>
           <input 
             type="text" 
-            placeholder="Enter Pincode" 
+            placeholder="Enter Pincode"
+            value={pincode}
+            onChange={(e) => setPincode(e.target.value)}
             style={{ padding: "10px", border: "1px solid #ccc", borderRadius: 4, marginRight: 10 }} 
           />
-          <button style={{ padding: "10px 20px", border: "none", background: "#2874f0", color: "#fff", borderRadius: 4, cursor: "pointer" }}>
+          <button 
+            onClick={handleCheckDelivery}
+            style={{ padding: "10px 20px", border: "none", background: "#2874f0", color: "#fff", borderRadius: 4, cursor: "pointer" }}
+          >
             Check
           </button>
+
+          {showAnimation && (
+            <div style={{ marginTop: 10, padding: 10, backgroundColor: "#d4edda", color: "#155724", borderRadius: 4, fontWeight: "bold" }}>
+              🚚 Delivery Available!
+            </div>
+          )}
         </div>
       </div>
     </div>

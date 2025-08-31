@@ -1,15 +1,20 @@
 package com.wipro.ecommerce.onlineshopping.controller;
 
+import com.wipro.ecommerce.onlineshopping.dto.OrderDTO;
+import com.wipro.ecommerce.onlineshopping.dto.OrderRequest;
 import com.wipro.ecommerce.onlineshopping.entity.Order;
-import com.wipro.ecommerce.onlineshopping.entity.OrderItem;
 import com.wipro.ecommerce.onlineshopping.service.OrderService;
+
+import org.springframework.data.domain.Page;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
 @RestController
-@RequestMapping("/orders")
+@RequestMapping("/orders") 
+@CrossOrigin(origins = "http://localhost:3000")
 public class OrderController {
 
     private final OrderService orderService;
@@ -18,22 +23,89 @@ public class OrderController {
         this.orderService = orderService;
     }
 
-    // POST /api/orders → Place order
+    // Place a new order
     @PostMapping
-    public ResponseEntity<Order> placeOrder(@RequestParam Long userId,
-                                            @RequestBody List<OrderItem> items) {
-        return ResponseEntity.ok(orderService.placeOrder(userId, items));
+    public ResponseEntity<?> placeOrder(@RequestBody OrderRequest request) {
+        try {
+            Order savedOrder = orderService.placeOrder(request.getUserId(), request.getItems());
+            return ResponseEntity.ok(savedOrder); // ✅ return full order object
+        } catch (Exception e) {
+            // log the exception
+            e.printStackTrace();
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                                 .body("Failed to place order: " + e.getMessage());
+        }
     }
 
-    // GET /api/orders/{userId} → Get user orders
+//    @GetMapping("/{userId}")
+//    public ResponseEntity<?> getUserOrders(@PathVariable Long userId) {
+//        try {
+//            List<OrderDTO> orders = orderService.getUserOrders(userId); // returns DTOs now
+//            return ResponseEntity.ok(orders);
+//        } catch (Exception e) {
+//            e.printStackTrace();
+//            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+//                                 .body("Failed to fetch orders for userId: " + userId);
+//        }
+//    }
+    
+    
     @GetMapping("/{userId}")
-    public ResponseEntity<List<Order>> getUserOrders(@PathVariable Long userId) {
-        return ResponseEntity.ok(orderService.getUserOrders(userId));
+    public ResponseEntity<?> getUserOrders(
+            @PathVariable Long userId,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "8") int size) {
+        try {
+            Page<OrderDTO> orders = orderService.getUserOrders(userId, page, size);
+            return ResponseEntity.ok(orders);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                                 .body("Failed to fetch orders for userId: " + userId);
+        }
     }
 
-    // GET /api/orders (Admin) → Get all orders
+
+
+    // Get all orders (Admin)
     @GetMapping
-    public ResponseEntity<List<Order>> getAllOrders() {
-        return ResponseEntity.ok(orderService.getAllOrders());
+    public ResponseEntity<?> getAllOrders() {
+        try {
+            List<Order> orders = orderService.getAllOrders();
+            return ResponseEntity.ok(orders);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                                 .body("Failed to fetch all orders");
+        }
     }
+    
+    @GetMapping("/order/{orderId}")
+    public ResponseEntity<?> getOrderById(@PathVariable Long orderId) {
+        try {
+            Order order = orderService.getOrderById(orderId);
+            return ResponseEntity.ok(order);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                                 .body("Order not found with ID: " + orderId);
+        }
+    }
+    
+    @PutMapping("/{orderId}/status")
+    public ResponseEntity<?> updateOrderStatus(
+            @PathVariable Long orderId,
+            @RequestParam Order.OrderStatus status) {
+        try {
+            Order order = orderService.updateOrderStatus(orderId, status);
+            return ResponseEntity.ok(order);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                                 .body("Failed to update order status: " + e.getMessage());
+        }
+    }
+
+
+    
 }

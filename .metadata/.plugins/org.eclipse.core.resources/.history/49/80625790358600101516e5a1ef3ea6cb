@@ -1,0 +1,74 @@
+package com.wipro.ecommerce.onlineshopping.service;
+
+import com.wipro.ecommerce.onlineshopping.entity.*;
+import com.wipro.ecommerce.onlineshopping.repository.*;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.math.BigDecimal;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+
+@Service
+public class OrderService {
+
+    private final OrderRepository orderRepo;
+    private final UserRepository userRepo;
+    private final ProductRepository productRepo;
+
+    public OrderService(OrderRepository orderRepo, UserRepository userRepo, ProductRepository productRepo) {
+        this.orderRepo = orderRepo;
+        this.userRepo = userRepo;
+        this.productRepo = productRepo;
+    }
+
+    // Place order with transactional to ensure atomicity
+    @Transactional
+    public Order placeOrder(Long userId, List<OrderItem> orderItems) {
+        // Fetch user
+        User user = userRepo.findById(userId)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        // Prepare order items & calculate total
+        BigDecimal total = BigDecimal.ZERO;
+        Set<OrderItem> items = new HashSet<>();
+
+        for (OrderItem item : orderItems) {
+            // Fetch product details
+            Product product = productRepo.findById(item.getProduct().getId())
+                    .orElseThrow(() -> new RuntimeException("Product not found"));
+
+            // Set product & quantity
+            item.setProduct(product);
+
+            // Calculate line total
+            BigDecimal lineTotal = product.getPrice().multiply(BigDecimal.valueOf(item.getQuantity()));
+            total = total.add(lineTotal);
+
+            items.add(item);
+        }
+
+        // Create order
+        Order order = new Order(user, total);
+        order.setOrderItems(items);
+
+        // Link orderItems back to order
+        items.forEach(item -> item.setOrder(order));
+
+        // Save order along with items (cascade)
+        return orderRepo.save(order);
+    }
+
+    // Get orders by user
+    public List<Order> getUserOrders(Long userId) {
+        User user = userRepo.findById(userId)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+        return orderRepo.findByUser(user);
+    }
+
+    // Get all orders for admin
+    public List<Order> getAllOrders() {
+        return orderRepo.findAll();
+    }
+}

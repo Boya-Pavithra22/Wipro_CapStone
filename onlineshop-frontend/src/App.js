@@ -9,8 +9,12 @@ import ProductList from "./components/ProductList";
 import ProductDetails from "./components/ProductDetails";
 import Cart from "./components/Cart";
 import Orders from "./components/Orders";
-import Payment from "./components/Payment";
+import Payment from "./components/PaymentPage";
 import Navbar from "./components/Navbar";
+import Checkout from "./components/Checkout";
+import CongratsPage from "./components/CongratsPage";
+import MyOrders from "./components/MyOrders";
+
 
 // Admin Components
 import AdminDashboard from "./components/admin/AdminDashboard";
@@ -35,7 +39,7 @@ function AdminRoute({ children }) {
 function App() {
   return (
     <AuthProvider>
-      <CartProvider>   {/* ✅ wrap everything with CartProvider */}
+      <CartProvider>  
         <Router>
           <Navbar />
           <Routes>
@@ -49,6 +53,12 @@ function App() {
             <Route path="/cart" element={<PrivateRoute><Cart /></PrivateRoute>} />
             <Route path="/orders" element={<PrivateRoute><Orders /></PrivateRoute>} />
             <Route path="/payment/:id" element={<PrivateRoute><Payment /></PrivateRoute>} />
+            <Route path="/checkout" element={<PrivateRoute><Checkout /></PrivateRoute>} />  
+            <Route path="/congrats" element={<PrivateRoute><CongratsPage /></PrivateRoute>} />  
+            <Route path="/my-orders" element={<PrivateRoute><MyOrders /></PrivateRoute>} /> 
+
+
+
 
             {/* Admin Routes */}
             <Route path="/admin/dashboard" element={<AdminRoute><AdminDashboard /></AdminRoute>} />

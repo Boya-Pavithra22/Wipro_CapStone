@@ -1,8 +1,16 @@
 package com.wipro.ecommerce.onlineshopping.service;
 
+import com.wipro.ecommerce.onlineshopping.dto.OrderDTO;
+import com.wipro.ecommerce.onlineshopping.dto.OrderItemDTO;
+import com.wipro.ecommerce.onlineshopping.dto.OrderItemRequest;
 import com.wipro.ecommerce.onlineshopping.entity.*;
 import com.wipro.ecommerce.onlineshopping.repository.*;
+
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.util.HashSet;
@@ -15,54 +23,99 @@ public class OrderService {
     private final OrderRepository orderRepo;
     private final UserRepository userRepo;
     private final ProductRepository productRepo;
+    private final CartRepository cartRepo;
 
-    public OrderService(OrderRepository orderRepo, UserRepository userRepo, ProductRepository productRepo) {
+    public OrderService(OrderRepository orderRepo,
+                        UserRepository userRepo,
+                        ProductRepository productRepo,
+                        CartRepository cartRepo) {
         this.orderRepo = orderRepo;
         this.userRepo = userRepo;
         this.productRepo = productRepo;
+        this.cartRepo = cartRepo;
     }
 
-    // Place order
-    public Order placeOrder(Long userId, List<OrderItem> orderItems) {
+    @Transactional
+    public Order placeOrder(Long userId, List<OrderItemRequest> items) {
         User user = userRepo.findById(userId)
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
         BigDecimal total = BigDecimal.ZERO;
-        Set<OrderItem> items = new HashSet<>();
+        Set<OrderItem> orderItems = new HashSet<>();
 
-        for (OrderItem item : orderItems) {
-            Product product = productRepo.findById(item.getProduct().getId())
-                    .orElseThrow(() -> new RuntimeException("Product not found"));
+        for (OrderItemRequest req : items) {
+            Product product = productRepo.findById(req.getProductId())
+                    .orElseThrow(() -> new RuntimeException("Product not found: " + req.getProductId()));
 
-            // calculate total = price * qty
-            BigDecimal lineTotal = product.getPrice().multiply(BigDecimal.valueOf(item.getQuantity()));
-            total = total.add(lineTotal);
-
-            item.setOrder(null); // will be set after order is created
+            OrderItem item = new OrderItem();
             item.setProduct(product);
-            items.add(item);
+            item.setQuantity(req.getQuantity());
+            BigDecimal lineTotal = product.getPrice().multiply(BigDecimal.valueOf(req.getQuantity()));
+            item.setPrice(lineTotal);
+
+            total = total.add(lineTotal);
+            orderItems.add(item);
         }
 
         Order order = new Order(user, total);
-        order.setOrderItems(items);
+        order.setOrderItems(orderItems);
+        orderItems.forEach(oi -> oi.setOrder(order));
 
-        // Link back orderItems -> order
-        for (OrderItem item : items) {
-            item.setOrder(order);
-        }
+        Order savedOrder = orderRepo.save(order);
 
-        return orderRepo.save(order);
+        // Do NOT clear cart immediately; keep until payment success if needed
+        // cartRepo.deleteByUser(user);
+
+        return savedOrder;
     }
 
-    // Get all orders of a user
-    public List<Order> getUserOrders(Long userId) {
-        User user = userRepo.findById(userId)
-                .orElseThrow(() -> new RuntimeException("User not found"));
-        return orderRepo.findByUser(user);
+    public Page<OrderDTO> getUserOrders(Long userId, int page, int size) {
+        Pageable pageable = PageRequest.of(page, size);
+
+        // Fetch paginated orders from repo
+        Page<Order> ordersPage = orderRepo.findByUserId(userId, pageable);
+
+        // Map Orders to OrderDTOs
+        return ordersPage.map(order -> {
+            List<OrderItemDTO> items = order.getOrderItems().stream().map(oi -> {
+                // Ensure product is not null
+                var product = oi.getProduct();
+                return new OrderItemDTO(
+                    oi.getId(),
+                    product != null ? product.getId() : null,
+                    product != null ? product.getName() : "Unknown Product",
+                    product != null ? product.getImageUrl() : "",
+                    oi.getPrice(),
+                    oi.getQuantity()
+                );
+            }).toList();
+
+            return new OrderDTO(
+                order.getId(),
+                order.getTotalAmount(),
+                order.getStatus().name(),
+                order.getOrderDate(),
+                items
+            );
+        });
     }
 
-    // Get all orders (admin)
     public List<Order> getAllOrders() {
         return orderRepo.findAll();
     }
+
+    @Transactional(readOnly = true)
+    public Order getOrderById(Long orderId) {
+        return orderRepo.findByIdWithItems(orderId)
+                .orElseThrow(() -> new RuntimeException("Order not found with ID: " + orderId));
+    }
+    
+    @Transactional
+    public Order updateOrderStatus(Long orderId, Order.OrderStatus status) {
+        Order order = orderRepo.findById(orderId)
+                .orElseThrow(() -> new RuntimeException("Order not found with ID: " + orderId));
+        order.setStatus(status);
+        return orderRepo.save(order);
+    }
+
 }

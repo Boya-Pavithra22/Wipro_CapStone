@@ -7,6 +7,10 @@ import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.Set;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
+
 @Entity
 @Table(name = "orders")
 public class Order {
@@ -16,6 +20,7 @@ public class Order {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)
+    @JsonBackReference
     private User user;
 
     @NotNull
@@ -30,6 +35,7 @@ public class Order {
     private LocalDateTime orderDate = LocalDateTime.now();
 
     @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @JsonManagedReference 
     private Set<OrderItem> orderItems = new HashSet<>();
 
     @OneToOne(mappedBy = "order", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
@@ -60,8 +66,12 @@ public class Order {
     public void setOrderDate(LocalDateTime orderDate) { this.orderDate = orderDate; }
 
     public Set<OrderItem> getOrderItems() { return orderItems; }
-    public void setOrderItems(Set<OrderItem> orderItems) { this.orderItems = orderItems; }
-
+    public void setOrderItems(Set<OrderItem> orderItems) {
+        this.orderItems.clear();
+        if (orderItems != null) {
+            this.orderItems.addAll(orderItems);
+        }
+    }
     public Payment getPayment() { return payment; }
     public void setPayment(Payment payment) { this.payment = payment; }
 

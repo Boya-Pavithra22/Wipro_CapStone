@@ -20,7 +20,7 @@ public class OnlineShoppingBackendApplication {
             public void addCorsMappings(CorsRegistry registry) {
                 registry.addMapping("/**") // allow CORS for all endpoints
                         .allowedOrigins("http://localhost:3000")
-                        .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS")
+                        .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS" ,"PATCH")
                         .allowCredentials(true);
             }
         };

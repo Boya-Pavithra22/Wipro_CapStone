@@ -1,0 +1,66 @@
+package com.wipro.ecommerce.onlineshopping.service;
+
+import com.wipro.ecommerce.onlineshopping.dto.OrderItemRequest;
+import com.wipro.ecommerce.onlineshopping.entity.*;
+import com.wipro.ecommerce.onlineshopping.repository.*;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.math.BigDecimal;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+
+@Service
+public class OrderService {
+
+    private final OrderRepository orderRepo;
+    private final UserRepository userRepo;
+    private final ProductRepository productRepo;
+
+    public OrderService(OrderRepository orderRepo, UserRepository userRepo, ProductRepository productRepo) {
+        this.orderRepo = orderRepo;
+        this.userRepo = userRepo;
+        this.productRepo = productRepo;
+    }
+
+    @Transactional
+    public Order placeOrder(Long userId, List<OrderItemRequest> items) {
+        User user = userRepo.findById(userId)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        BigDecimal total = BigDecimal.ZERO;
+        Set<OrderItem> orderItems = new HashSet<>();
+
+        for (OrderItemRequest req : items) {
+            Product product = productRepo.findById(req.getProductId())
+                    .orElseThrow(() -> new RuntimeException("Product not found: " + req.getProductId()));
+
+            OrderItem item = new OrderItem();
+            item.setProduct(product);
+            item.setQuantity(req.getQuantity());
+            item.setPrice(product.getPrice());
+
+            total = total.add(product.getPrice().multiply(BigDecimal.valueOf(req.getQuantity())));
+            orderItems.add(item);
+        }
+
+        Order order = new Order(user, total);
+        order.setOrderItems(orderItems);
+        orderItems.forEach(oi -> oi.setOrder(order));
+
+        return orderRepo.save(order);
+    }
+
+    // Get orders by user
+    public List<Order> getUserOrders(Long userId) {
+        User user = userRepo.findById(userId)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+        return orderRepo.findByUser(user);
+    }
+
+    // Get all orders for admin
+    public List<Order> getAllOrders() {
+        return orderRepo.findAll();
+    }
+}

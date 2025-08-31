@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useContext } from "react";
-import API from "../services/api";
+import api from "../services/api";
 import { AuthContext } from "../context/AuthContext";
 
 export default function Orders() {
@@ -8,7 +8,7 @@ export default function Orders() {
 
   useEffect(() => {
     if (user) {
-      API.get(`/orders/${user.userId}`).then((res) => setOrders(res.data));
+      api.get(`/orders/${user.userId}`).then((res) => setOrders(res.data));
     }
   }, [user]);
 

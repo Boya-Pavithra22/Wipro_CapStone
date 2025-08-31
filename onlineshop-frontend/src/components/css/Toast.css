@@ -1,0 +1,40 @@
+.toast {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  padding: 12px 20px;
+  color: #fff;
+  border-radius: 8px;
+  font-weight: bold;
+  z-index: 9999;
+  opacity: 0;
+  transform: translateY(-20px);
+  animation: slideDown 0.3s forwards, fadeOut 0.5s 2.5s forwards;
+  box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+}
+
+.toast.info {
+  background: #333;
+}
+
+.toast.success {
+  background: #4BB543;
+}
+
+.toast.error {
+  background: #FF4C4C;
+}
+
+@keyframes slideDown {
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+@keyframes fadeOut {
+  to {
+    transform: translateY(-20px);
+    opacity: 0;
+  }
+}

@@ -24,6 +24,7 @@ const Login = () => {
         name: res.data.name,
         email: res.data.email,
         userId : res.data.userId,
+        address : res.data.address,
       });
 
       // Small delay so Navbar sees updated user

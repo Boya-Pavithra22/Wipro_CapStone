@@ -32,12 +32,11 @@ const Navbar = () => {
           <div style={{ display: "flex", alignItems: "center", gap: "30px", fontSize: "14px", fontWeight: "bold" }}>
             
             {/* Profile */}
-            <div 
-              style={{ position: "relative", cursor: "pointer" }}
-              onMouseEnter={() => setShowMenu(true)}
-              onMouseLeave={() => setShowMenu(false)}
-            >
-              👤 Profile
+            <div style={{ position: "relative", cursor: "pointer" }}>
+              <div onClick={() => setShowMenu(!showMenu)}>
+                👤 Profile
+              </div>
+
               {showMenu && (
                 <div style={{
                   position: "absolute", top: "120%", right: 0,
@@ -50,9 +49,14 @@ const Navbar = () => {
                   <p style={{ padding: "8px 12px", margin: 0, borderBottom: "1px solid #eee" }}>
                     {user?.email}
                   </p>
-                  <Link to="/orders" style={{ display: "block", padding: "8px 12px", textDecoration: "none", color: "#333" }}>
+
+                  <div
+                    onClick={() => navigate("/my-orders")}
+                    style={{ padding: "8px 12px", cursor: "pointer", color: "#333" }}
+                  >
                     My Orders
-                  </Link>
+                  </div>
+
                   <button 
                     onClick={handleLogout}
                     style={{ width: "100%", padding: "8px 12px", border: "none", background: "none", textAlign: "left", cursor: "pointer" }}
