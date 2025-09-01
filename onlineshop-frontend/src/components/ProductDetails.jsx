@@ -12,6 +12,10 @@ const ProductDetails = () => {
   const [pincode, setPincode] = useState("");
   const [showAnimation, setShowAnimation] = useState(false);
 
+  const [popupMessage, setPopupMessage] = useState(""); 
+  const [popupType, setPopupType] = useState("success"); 
+  const [showPopup, setShowPopup] = useState(false);
+
   const { user } = useContext(AuthContext);
   const { addItem } = useContext(CartContext);
 
@@ -26,27 +30,34 @@ const ProductDetails = () => {
 
   if (!product) return <p>Loading...</p>;
 
+  // ✅ helper to show popup
+  const triggerPopup = (message, type = "success") => {
+    setPopupMessage(message);
+    setPopupType(type);
+    setShowPopup(true);
+    setTimeout(() => setShowPopup(false), 3000);
+  };
+
   const handleAddToCart = async () => {
     if (!user) {
-      alert("Please login first");
+      triggerPopup("Please login first", "error");
       return;
     }
 
     try {
       await addItem(product.id, 1);
-      alert(`Added to cart!\nUser ID: ${user.userId}\nProduct ID: ${product.id}\nQuantity: 1`);
+      triggerPopup(`🛒 Added ${product.name} to cart!`);
     } catch (err) {
       console.error("Failed to add to cart:", err);
-      alert("Failed to add to cart");
+      triggerPopup("Failed to add to cart", "error");
     }
   };
 
   const handleCheckDelivery = () => {
     if (!pincode) {
-      alert("Please enter a pincode");
+      triggerPopup("Please enter a pincode", "error");
       return;
     }
-    // Show delivery animation
     setShowAnimation(true);
     setTimeout(() => setShowAnimation(false), 3000);
   };
@@ -201,6 +212,27 @@ const ProductDetails = () => {
           )}
         </div>
       </div>
+
+      {/* ✅ Popup Notification */}
+      {showPopup && (
+        <div 
+          style={{
+            position: "fixed",
+            bottom: 30,
+            right: 30,
+            background: popupType === "success" ? "#28a745" : "#dc3545",
+            color: "#fff",
+            padding: "12px 20px",
+            borderRadius: 6,
+            boxShadow: "0px 4px 10px rgba(0,0,0,0.2)",
+            fontWeight: "bold",
+            zIndex: 1000,
+            animation: "fadeInOut 3s ease"
+          }}
+        >
+          {popupMessage}
+        </div>
+      )}
     </div>
   );
 };
