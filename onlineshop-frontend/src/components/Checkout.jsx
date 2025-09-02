@@ -21,16 +21,16 @@ const Checkout = () => {
   const [isModified, setIsModified] = useState(false);
   const [removingItems, setRemovingItems] = useState([]);
 
-  // ✅ Popup state
+  
   const [popup, setPopup] = useState({ show: false, message: "", type: "success" });
 
-  // ✅ Helper to show popup
+  
   const showPopup = (message, type = "success") => {
     setPopup({ show: true, message, type });
     setTimeout(() => setPopup({ show: false, message: "", type }), 2000);
   };
 
-  // Populate form with user data
+  
   useEffect(() => {
     if (user) {
       const userData = {
@@ -120,10 +120,10 @@ const Checkout = () => {
 
   return (
     <div style={{ maxWidth: 1200, margin: "30px auto", padding: 20, display: "flex", gap: 30, flexWrap: "wrap" }}>
-      {/* ✅ Popup component */}
+      
       <TopPopup show={popup.show} message={popup.message} type={popup.type} />
 
-      {/* Left Column: User Details */}
+      
       <div style={{ flex: 1, minWidth: 350, padding: 25, border: "1px solid #ddd", borderRadius: 8, boxShadow: "0 2px 8px rgba(0,0,0,0.05)" }}>
         <h3 style={{ marginBottom: 20 }}>Your Details</h3>
         <div style={{ display: "flex", flexDirection: "column", gap: 15 }}>
@@ -151,7 +151,7 @@ const Checkout = () => {
         </button>
       </div>
 
-      {/* Right Column: Cart */}
+      
       <div style={{ flex: 1, minWidth: 350, padding: 25, border: "1px solid #ddd", borderRadius: 8, boxShadow: "0 2px 8px rgba(0,0,0,0.05)", display: "flex", flexDirection: "column", maxHeight: "600px" }}>
         <h3 style={{ marginBottom: 20 }}>Products in Cart</h3>
         {cartItems.length === 0 ? (

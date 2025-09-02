@@ -160,7 +160,7 @@ const ProductDetails = () => {
         </div>
       </div>
 
-      {/* RIGHT: Product details / Edit */}
+      
       <div style={{ flex: 1 }}>
         {isEditing ? (
           <motion.div

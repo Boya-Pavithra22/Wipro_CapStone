@@ -41,7 +41,7 @@ const Dashboard = () => {
         </div>
       </div>
 
-      {/* Toast Notification */}
+      
       {showToast && <div className="toast">{toastMessage}</div>}
     </div>
   );

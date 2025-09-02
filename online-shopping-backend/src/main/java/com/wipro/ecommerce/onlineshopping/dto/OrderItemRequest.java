@@ -6,10 +6,8 @@ public class OrderItemRequest {
     private Long productId;
     private Integer quantity;
 
-    // Optional: price from frontend if you want
     private BigDecimal price;
 
-    // Getters & setters
     public Long getProductId() { return productId; }
     public void setProductId(Long productId) { this.productId = productId; }
 

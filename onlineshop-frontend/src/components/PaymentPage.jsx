@@ -20,7 +20,7 @@ const PaymentPage = () => {
     cardName: "",
   });
 
-  const [notification, setNotification] = useState(null); // { message: "", type: "success" | "error" }
+  const [notification, setNotification] = useState(null);
 
   useEffect(() => {
     const fetchOrder = async () => {
@@ -37,7 +37,7 @@ const PaymentPage = () => {
 
   const showNotification = (message, type = "info") => {
     setNotification({ message, type });
-    setTimeout(() => setNotification(null), 3000); // hide after 3s
+    setTimeout(() => setNotification(null), 3000); 
   };
 
   const handleCardChange = (e) => {
@@ -62,10 +62,10 @@ const PaymentPage = () => {
     }
 
     try {
-      // 1️⃣ Update order status
+      
       await api.put(`/orders/${orderId}/status?status=CONFIRMED`);
 
-      // 2️⃣ Insert payment record
+      
       const paymentRequest = {
         orderId: order.id,
         paymentMethod: paymentMethod,
@@ -73,7 +73,7 @@ const PaymentPage = () => {
       };
       await api.post("/payments", paymentRequest);
 
-      // 3️⃣ Clear cart
+      
       for (let item of cart) await removeItem(item.id);
       setCart([]);
       setCartCount(0);
@@ -82,7 +82,7 @@ const PaymentPage = () => {
 
       setTimeout(() => {
         navigate("/congrats");
-      }, 2000); // navigate after 2s
+      }, 2000); 
     } catch (err) {
       console.error("Payment error:", err);
       showNotification("Payment failed!", "error");
@@ -94,7 +94,7 @@ const PaymentPage = () => {
   return (
     <div style={{ maxWidth: 1000, margin: "40px auto", display: "flex", gap: 20, position: "relative" }}>
       
-      {/* Notification Box */}
+      
       {notification && (
         <div
           style={{
@@ -115,7 +115,7 @@ const PaymentPage = () => {
         </div>
       )}
 
-      {/* Order Summary */}
+      
       <div
         style={{
           flex: 1,
@@ -169,7 +169,7 @@ const PaymentPage = () => {
         </div>
       </div>
 
-      {/* Payment Options */}
+      
       <div style={{ flex: 1, border: "1px solid #ddd", borderRadius: 8, padding: 20 }}>
         <h3>Choose Payment Method</h3>
         <div style={{ marginTop: 20 }}>

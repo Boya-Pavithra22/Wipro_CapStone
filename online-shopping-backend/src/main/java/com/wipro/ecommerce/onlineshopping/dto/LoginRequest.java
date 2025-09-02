@@ -11,7 +11,6 @@ public class LoginRequest {
     @Schema(description = "Password of the user", example = "password123")
     private String password;
 
-    // Getters and setters
     public String getEmail() { return email; }
     public void setEmail(String email) { this.email = email; }
 

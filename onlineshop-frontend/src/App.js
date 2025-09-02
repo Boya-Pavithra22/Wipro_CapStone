@@ -1,7 +1,7 @@
 import React, { useContext } from "react";
 import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
 import { AuthProvider, AuthContext } from "./context/AuthContext";
-import { CartProvider } from "./components/CartContext";   // ✅ import CartProvider
+import { CartProvider } from "./components/CartContext";   
 
 import Login from "./components/auth/Login";
 import Register from "./components/auth/Register";
@@ -17,7 +17,7 @@ import MyOrders from "./components/MyOrders";
 
 
 
-// Admin Components
+
 import AdminDashboard from "./components/admin/AdminDashboard";
 import AdminForm from "./components/admin/AdminForm";
 import CategoryForm from "./components/admin/CategoryForm";
@@ -28,13 +28,13 @@ import AddProduct from "./components/AddProduct";
 
 import 'bootstrap/dist/css/bootstrap.min.css';
 
-// Private Route for authenticated users
+
 function PrivateRoute({ children }) {
   const { user } = useContext(AuthContext);
   return user ? children : <Navigate to="/login" />;
 }
 
-// Admin Route for users with role ADMIN
+
 function AdminRoute({ children }) {
   const { user } = useContext(AuthContext);
   return user && user.role === "ADMIN" ? children : <Navigate to="/login" />;
@@ -74,7 +74,7 @@ function App() {
 
 
 
-            {/* Catch-all route */}
+            
             <Route path="*" element={<Navigate to="/" />} />
           </Routes>
         </Router>

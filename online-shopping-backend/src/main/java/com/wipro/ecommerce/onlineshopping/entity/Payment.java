@@ -22,7 +22,6 @@ public class Payment {
     @Column(name = "transaction_id")
     private String transactionId;
 
-    // Constructors
     public Payment() {}
 
     public Payment(Order order, String transactionId) {
@@ -30,7 +29,6 @@ public class Payment {
         this.transactionId = transactionId;
     }
 
-    // Getters and Setters
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
 

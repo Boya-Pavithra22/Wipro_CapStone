@@ -62,11 +62,7 @@ public class AdminDashboardController {
         return ResponseEntity.ok(productRepository.findAll());
     }
 
-//    @PostMapping("/products")
-//    public ResponseEntity<Product> addProduct(@RequestBody Product product) {
-//        return ResponseEntity.ok(productRepository.save(product));
-//    }
-    
+
     
     
     @PostMapping("/products")
@@ -76,19 +72,16 @@ public class AdminDashboardController {
             throw new IllegalArgumentException("Category name cannot be null or empty");
         }
 
-        // Find Category entity by name
         Category cat = categoryRepository.findByName(dto.getCategoryName())
                 .orElseThrow(() -> new RuntimeException("Category not found with name: " + dto.getCategoryName()));
         
-        System.out.println("ANILLLLLLLLLL"+cat);
 
-        // Create Product entity
         Product product = new Product();
         product.setName(dto.getName());
         product.setDescription(dto.getDescription());
         product.setPrice(dto.getPrice());
         product.setStock(dto.getStock());
-        product.setCategory(cat); // Assign the managed Category entity
+        product.setCategory(cat); 
         product.setImageUrl(dto.getImageUrl());
 
         // Save Product

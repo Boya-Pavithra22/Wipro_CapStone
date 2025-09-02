@@ -9,7 +9,7 @@ export const CartProvider = ({ children }) => {
   const [cart, setCart] = useState([]);
   const [cartCount, setCartCount] = useState(0);
 
-  // Fetch cart items from backend
+  
   const fetchCart = useCallback(async () => {
     if (!user) {
       setCart([]);
@@ -52,7 +52,7 @@ export const CartProvider = ({ children }) => {
     }
   };
 
-  // Clear the entire cart
+  // Clears the entire cart
   const clearCart = async () => {
     if (!cart || cart.length === 0) return;
     try {

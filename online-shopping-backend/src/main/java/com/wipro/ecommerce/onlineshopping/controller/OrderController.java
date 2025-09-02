@@ -23,7 +23,6 @@ public class OrderController {
         this.orderService = orderService;
     }
 
-    // Place a new order
     @PostMapping
     public ResponseEntity<?> placeOrder(@RequestBody OrderRequest request) {
         try {

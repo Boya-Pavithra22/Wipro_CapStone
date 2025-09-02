@@ -5,7 +5,6 @@ import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
 import java.math.BigDecimal;
 
-import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
 @Entity
@@ -33,7 +32,6 @@ public class OrderItem {
     @Column(precision = 10, scale = 2)
     private BigDecimal price;
 
-    // Constructors
     public OrderItem() {}
 
     public OrderItem(Order order, Product product, Integer quantity, BigDecimal price) {
@@ -43,7 +41,6 @@ public class OrderItem {
         this.price = price;
     }
 
-    // Getters and Setters
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
 

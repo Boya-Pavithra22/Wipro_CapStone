@@ -38,7 +38,6 @@ public class Product {
 
     private String imageUrl;
 
-    // Constructors
     public Product() {}
 
     public Product(String name, String description, BigDecimal price, Integer stock, Category category) {
@@ -49,7 +48,6 @@ public class Product {
         this.category = category;
     }
 
-    // Getters and Setters
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
 

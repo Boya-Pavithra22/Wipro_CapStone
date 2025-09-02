@@ -14,7 +14,7 @@ const MyOrders = () => {
     const fetchOrders = async () => {
       try {
         const res = await api.get(`/orders/${user.userId}?page=${page}&size=4`);
-        setOrders(res.data.content || res.data); // adjust according to backend response
+        setOrders(res.data.content || res.data); 
         setTotalPages(res.data.totalPages || 1);
       } catch (err) {
         console.error("Failed to fetch orders:", err);
@@ -57,7 +57,7 @@ const MyOrders = () => {
         My Orders ({orders.length})
       </h2>
 
-      {/* Scrollable container */}
+      
       <div
         style={{
           maxHeight: "600px",
@@ -65,7 +65,7 @@ const MyOrders = () => {
           display: "flex",
           flexDirection: "column",
           gap: 30,
-          paddingRight: 10, // avoid scrollbar overlaying content
+          paddingRight: 10,
         }}
       >
         {orders.map((order) => (
@@ -147,7 +147,7 @@ const MyOrders = () => {
         ))}
       </div>
 
-      {/* Pagination - always visible below scrollable container */}
+      
       {totalPages > 1 && (
         <div
           style={{

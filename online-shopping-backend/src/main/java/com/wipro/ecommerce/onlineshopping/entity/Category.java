@@ -26,7 +26,6 @@ public class Category {
     @JsonIgnore
     private Set<Product> products = new HashSet<>();
 
-    // Constructors
     public Category() {}
 
     public Category(String name, String description) {
@@ -34,7 +33,6 @@ public class Category {
         this.description = description;
     }
 
-    // Getters and Setters
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
 

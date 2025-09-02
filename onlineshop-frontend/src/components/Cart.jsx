@@ -68,7 +68,7 @@ const Cart = () => {
     <div style={{ maxWidth: 1200, margin: "20px auto", padding: "0 20px" }}>
       <h2 style={{ marginBottom: 20 }}>My Bag ({cart.length} items)</h2>
 
-      {/* Horizontal scroll container */}
+      
       <div
         style={{
           display: "flex",
@@ -109,7 +109,7 @@ const Cart = () => {
               </span>
             </p>
 
-            {/* Quantity Selector */}
+            
             <div style={{ marginTop: 5 }}>
               <label htmlFor={`qty-${item.id}`} style={{ marginRight: 5 }}>Qty:</label>
               <select
@@ -143,7 +143,7 @@ const Cart = () => {
         ))}
       </div>
 
-      {/* Total & Place Order */}
+      
       <div
         style={{
           display: "flex",

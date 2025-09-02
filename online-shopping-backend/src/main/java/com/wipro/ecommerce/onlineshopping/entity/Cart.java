@@ -23,7 +23,6 @@ public class Cart {
     @Min(1)
     private Integer quantity;
 
-    // Constructors
     public Cart() {}
 
     public Cart(User user, Product product, Integer quantity) {
@@ -32,7 +31,6 @@ public class Cart {
         this.quantity = quantity;
     }
 
-    // Getters and Setters
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
 

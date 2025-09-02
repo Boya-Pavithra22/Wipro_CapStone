@@ -30,7 +30,6 @@ public class CartService {
             return cartRepo.save(existing);
         }
 
-        // Else create new cart item
         User user = userRepo.findById(userId).orElseThrow();
         Product product = productRepo.findById(productId).orElseThrow();
         Cart cart = new Cart(user, product, quantity);

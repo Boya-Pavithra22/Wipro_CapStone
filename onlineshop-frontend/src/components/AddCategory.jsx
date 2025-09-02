@@ -20,7 +20,7 @@ const AddCategory = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      // ✅ attach token like AdminDashboard
+      
       await api.post(
         "/admin/categories",
         { name, description },
@@ -121,7 +121,7 @@ const AddCategory = () => {
         </motion.button>
       </form>
 
-      {/* Toast */}
+      
       {toast.show && (
         <motion.div
           initial={{ opacity: 0, y: 20 }}

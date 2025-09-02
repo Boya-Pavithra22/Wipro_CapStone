@@ -20,7 +20,6 @@ public class RegisterRequest {
     @Schema(description = "Phone number of the user", example = "+91-9876543210")
     private String phoneNumber;
 
-    // Getters and setters
     public String getName() { return name; }
     public void setName(String name) { this.name = name; }
 

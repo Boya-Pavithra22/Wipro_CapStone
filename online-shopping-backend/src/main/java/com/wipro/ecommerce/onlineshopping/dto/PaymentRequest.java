@@ -2,10 +2,9 @@ package com.wipro.ecommerce.onlineshopping.dto;
 
 public class PaymentRequest {
     private Long orderId;
-    private String paymentMethod; // e.g., CARD, UPI, NETBANKING
-    private double amount;        // amount to be paid
+    private String paymentMethod; 
+    private double amount;       
 
-    // getters & setters
     public Long getOrderId() { return orderId; }
     public void setOrderId(Long orderId) { this.orderId = orderId; }
 

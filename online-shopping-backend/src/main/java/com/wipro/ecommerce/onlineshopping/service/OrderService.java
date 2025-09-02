@@ -63,8 +63,6 @@ public class OrderService {
 
         Order savedOrder = orderRepo.save(order);
 
-        // Do NOT clear cart immediately; keep until payment success if needed
-        // cartRepo.deleteByUser(user);
 
         return savedOrder;
     }
@@ -72,10 +70,8 @@ public class OrderService {
     public Page<OrderDTO> getUserOrders(Long userId, int page, int size) {
         Pageable pageable = PageRequest.of(page, size);
 
-        // Fetch paginated orders from repo
         Page<Order> ordersPage = orderRepo.findByUserId(userId, pageable);
 
-        // Map Orders to OrderDTOs
         return ordersPage.map(order -> {
             List<OrderItemDTO> items = order.getOrderItems().stream().map(oi -> {
                 // Ensure product is not null

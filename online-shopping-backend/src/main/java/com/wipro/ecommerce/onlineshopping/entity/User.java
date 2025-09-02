@@ -59,7 +59,6 @@ public class User {
     @Schema(description = "List of orders placed by the user (ignored in API docs)")
     private Set<Order> orders = new HashSet<>();
 
-    // Constructors
     public User() {}
 
     public User(String name, String email, String password) {
@@ -68,7 +67,6 @@ public class User {
         this.password = password;
     }
 
-    // Getters and Setters
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
 

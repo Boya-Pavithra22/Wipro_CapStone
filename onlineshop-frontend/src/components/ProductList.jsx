@@ -19,7 +19,7 @@ const ProductList = () => {
   const { user } = useContext(AuthContext);
   const { addItem } = useContext(CartContext);
 
-  // Fetch categories
+  
   useEffect(() => {
     const fetchCategories = async () => {
       try {
@@ -34,7 +34,7 @@ const ProductList = () => {
     fetchCategories();
   }, [location]);
 
-  // Fetch products with pagination & filtering
+  
   useEffect(() => {
     const fetchProducts = async () => {
       try {
@@ -85,7 +85,7 @@ const ProductList = () => {
 
   return (
     <div style={{ display: "flex" }}>
-      {/* Sidebar */}
+      
       <div style={{ width: 220, minHeight: "100vh", borderRight: "1px solid #ddd", padding: 20, position: "sticky", top: 0, background: "#fff" }}>
         <h4>Categories</h4>
         <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
@@ -113,11 +113,10 @@ const ProductList = () => {
         </div>
       </div>
 
-      {/* Product Grid */}
+      
       <div style={{ flex: 1, padding: 20 }}>
         <h2>Products</h2>
 
-        {/* Search Bar (Myntra-style) */}
         <div style={{ marginBottom: 20 }}>
           <input
             type="text"
@@ -159,7 +158,7 @@ const ProductList = () => {
           ))}
         </div>
 
-        {/* Pagination */}
+        
         {totalPages > 1 && (
           <div style={{ marginTop: 20, textAlign: "center" }}>
             <button onClick={handlePrev} disabled={page === 0} className="page-btn">{"<<"}</button>
@@ -169,7 +168,7 @@ const ProductList = () => {
         )}
       </div>
 
-      {/* Toast Notification */}
+      
       {toast.show && (
         <div style={{
           position: "fixed", top: 20, left: "50%", transform: "translateX(-50%)",

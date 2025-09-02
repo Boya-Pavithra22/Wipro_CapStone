@@ -26,11 +26,10 @@ public class PaymentService {
         Order order = orderRepo.findById(request.getOrderId())
                 .orElseThrow(() -> new RuntimeException("Order not found"));
 
-        // In real-world, integrate with payment gateway here
         String transactionId = UUID.randomUUID().toString();
 
         Payment payment = new Payment(order, transactionId);
-        payment.setPaymentStatus(Payment.PaymentStatus.SUCCESS); // assume success for now
+        payment.setPaymentStatus(Payment.PaymentStatus.SUCCESS);
         return paymentRepo.save(payment);
     }
 }
