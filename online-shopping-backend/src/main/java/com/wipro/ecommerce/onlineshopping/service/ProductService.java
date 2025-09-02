@@ -27,7 +27,7 @@ public class ProductService {
 
 
     public List<String> getAllCategories() {
-        return productRepo.findDistinctCategoryNames();
+        return productRepo.findAllCategoryNames();
     }
     
     public Product getProductById(Long id) {

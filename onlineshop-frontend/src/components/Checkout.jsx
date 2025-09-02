@@ -3,7 +3,7 @@ import { AuthContext } from "../context/AuthContext";
 import { CartContext } from "../components/CartContext";
 import { useNavigate } from "react-router-dom";
 import api from "../services/api";
-import TopPopup from "../components/TopPopup"; // ✅ Import popup
+import TopPopup from "../components/TopPopup"; 
 
 const Checkout = () => {
   const { user, setUser } = useContext(AuthContext);

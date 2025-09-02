@@ -1,0 +1,70 @@
+package com.wipro.ecommerce.onlineshopping.repository;
+
+import com.wipro.ecommerce.onlineshopping.entity.*;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
+import org.springframework.boot.test.autoconfigure.orm.jpa.TestEntityManager;
+import org.springframework.test.context.ActiveProfiles;
+
+import java.math.BigDecimal;
+import java.util.List;
+import java.util.Optional;
+import java.util.Set;
+
+import static org.junit.jupiter.api.Assertions.*;
+
+@DataJpaTest
+@ActiveProfiles("test") // uses application-test.properties
+class OrderRepositoryTest {
+
+    @Autowired
+    private OrderRepository orderRepository;
+
+    @Autowired
+    private TestEntityManager entityManager;
+
+    private User testUser;
+    private Product testProduct;
+
+    @BeforeEach
+    void setUp() {
+        testUser = new User();
+        testUser.setName("John Doe");
+        testUser.setEmail("john@example.com");
+        testUser.setPassword("password");
+        entityManager.persist(testUser);
+
+        testProduct = new Product();
+        testProduct.setName("Laptop");
+        testProduct.setPrice(BigDecimal.valueOf(1200));
+        testProduct.setImageUrl("laptop.jpg");
+        entityManager.persist(testProduct);
+
+        Order order = new Order(testUser, BigDecimal.valueOf(2400));
+        OrderItem item = new OrderItem();
+        item.setProduct(testProduct);
+        item.setQuantity(2);
+        item.setPrice(BigDecimal.valueOf(2400));
+        item.setOrder(order);
+
+        order.setOrderItems(Set.of(item));
+        entityManager.persist(order);
+        entityManager.flush();
+    }
+
+    @Test
+    void testFindByUser() {
+        List<Order> orders = orderRepository.findByUser(testUser);
+        assertEquals(1, orders.size());
+    }
+
+    @Test
+    void testFindByIdWithItems() {
+        Order savedOrder = orderRepository.findAll().get(0);
+        Optional<Order> fetched = orderRepository.findByIdWithItems(savedOrder.getId());
+        assertTrue(fetched.isPresent());
+        assertEquals(1, fetched.get().getOrderItems().size());
+    }
+}

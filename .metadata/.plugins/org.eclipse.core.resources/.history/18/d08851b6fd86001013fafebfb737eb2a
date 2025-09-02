@@ -1,0 +1,47 @@
+package com.wipro.ecommerce.onlineshopping.controller;
+
+import com.wipro.ecommerce.onlineshopping.entity.User;
+import com.wipro.ecommerce.onlineshopping.service.AuthService;
+import org.junit.jupiter.api.Test;
+import org.mockito.Mockito;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.http.MediaType;
+import org.springframework.test.web.servlet.MockMvc;
+
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+
+@WebMvcTest(AuthController.class)
+class AuthControllerTest {
+
+    @Autowired
+    private MockMvc mockMvc;
+
+    @MockBean
+    private AuthService authService;
+
+    @Test
+    void testRegister() throws Exception {
+        User user = new User("John", "john@example.com", "password");
+        Mockito.when(authService.register(Mockito.any(User.class))).thenReturn(user);
+
+        mockMvc.perform(post("/auth/register")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"name\":\"John\",\"email\":\"john@example.com\",\"password\":\"password\"}"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.email").value("john@example.com"));
+    }
+
+    @Test
+    void testLogin() throws Exception {
+        Mockito.when(authService.login("john@example.com", "password")).thenReturn("jwt-token");
+
+        mockMvc.perform(post("/auth/login")
+                        .param("email", "john@example.com")
+                        .param("password", "password"))
+                .andExpect(status().isOk())
+                .andExpect(content().string("jwt-token"));
+    }
+}

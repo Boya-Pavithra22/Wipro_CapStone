@@ -1,0 +1,36 @@
+package com.wipro.ecommerce.onlineshopping.controller;
+
+import com.wipro.ecommerce.onlineshopping.entity.Payment;
+import com.wipro.ecommerce.onlineshopping.service.PaymentService;
+import org.junit.jupiter.api.Test;
+import org.mockito.Mockito;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.test.web.servlet.MockMvc;
+
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+
+@WebMvcTest(PaymentController.class)
+class PaymentControllerTest {
+
+    @Autowired
+    private MockMvc mockMvc;
+
+    @MockBean
+    private PaymentService paymentService;
+
+    @Test
+    void testMakePayment() throws Exception {
+        Payment payment = new Payment();
+        payment.setId(1L);
+        payment.setStatus("SUCCESS");
+
+        Mockito.when(paymentService.makePayment(1L)).thenReturn(payment);
+
+        mockMvc.perform(post("/payment/1"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.status").value("SUCCESS"));
+    }
+}

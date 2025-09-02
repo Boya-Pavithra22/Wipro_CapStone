@@ -16,11 +16,15 @@ import CongratsPage from "./components/CongratsPage";
 import MyOrders from "./components/MyOrders";
 
 
+
 // Admin Components
 import AdminDashboard from "./components/admin/AdminDashboard";
 import AdminForm from "./components/admin/AdminForm";
 import CategoryForm from "./components/admin/CategoryForm";
 import ProductForm from "./components/admin/ProductForm";
+import AddCategory from "./components/AddCategory";
+import AddProduct from "./components/AddProduct";
+
 
 import 'bootstrap/dist/css/bootstrap.min.css';
 
@@ -65,6 +69,10 @@ function App() {
             <Route path="/admin/add-admin" element={<AdminRoute><AdminForm /></AdminRoute>} />
             <Route path="/admin/categories" element={<AdminRoute><CategoryForm /></AdminRoute>} />
             <Route path="/admin/products" element={<AdminRoute><ProductForm /></AdminRoute>} />
+            <Route path="/admin/add-category" element={<AddCategory />} />
+            <Route path="/admin/add-product" element={<AddProduct />} />
+
+
 
             {/* Catch-all route */}
             <Route path="*" element={<Navigate to="/" />} />

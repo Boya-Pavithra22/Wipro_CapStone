@@ -1,0 +1,173 @@
+package com.wipro.ecommerce.onlineshopping.service;
+
+import com.wipro.ecommerce.onlineshopping.dto.OrderDTO;
+import com.wipro.ecommerce.onlineshopping.dto.OrderItemRequest;
+import com.wipro.ecommerce.onlineshopping.entity.*;
+import com.wipro.ecommerce.onlineshopping.repository.*;
+
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.mockito.ArgumentCaptor;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
+import org.springframework.data.domain.*;
+
+import java.math.BigDecimal;
+import java.util.*;
+
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.*;
+
+class OrderServiceTest {
+
+    @Mock
+    private OrderRepository orderRepo;
+    @Mock
+    private UserRepository userRepo;
+    @Mock
+    private ProductRepository productRepo;
+    @Mock
+    private CartRepository cartRepo;
+
+    @InjectMocks
+    private OrderService orderService;
+
+    private User testUser;
+    private Product testProduct;
+
+    @BeforeEach
+    void setUp() {
+        MockitoAnnotations.openMocks(this);
+
+        testUser = new User();
+        testUser.setId(1L);
+
+        testProduct = new Product();
+        testProduct.setId(10L);
+        testProduct.setName("Test Product");
+        testProduct.setPrice(BigDecimal.valueOf(100));
+        testProduct.setImageUrl("test.jpg");
+    }
+
+    @Test
+    void testPlaceOrder_Success() {
+        OrderItemRequest request = new OrderItemRequest(10L, 2);
+
+        when(userRepo.findById(1L)).thenReturn(Optional.of(testUser));
+        when(productRepo.findById(10L)).thenReturn(Optional.of(testProduct));
+        when(orderRepo.save(any(Order.class))).thenAnswer(inv -> inv.getArgument(0));
+
+        Order result = orderService.placeOrder(1L, List.of(request));
+
+        assertNotNull(result);
+        assertEquals(BigDecimal.valueOf(200), result.getTotalAmount());
+        assertEquals(1, result.getOrderItems().size());
+
+        verify(orderRepo, times(1)).save(any(Order.class));
+    }
+
+    @Test
+    void testPlaceOrder_UserNotFound() {
+        when(userRepo.findById(99L)).thenReturn(Optional.empty());
+
+        RuntimeException ex = assertThrows(RuntimeException.class,
+                () -> orderService.placeOrder(99L, List.of()));
+
+        assertEquals("User not found", ex.getMessage());
+    }
+
+    @Test
+    void testPlaceOrder_ProductNotFound() {
+        when(userRepo.findById(1L)).thenReturn(Optional.of(testUser));
+        when(productRepo.findById(10L)).thenReturn(Optional.empty());
+
+        OrderItemRequest req = new OrderItemRequest(10L, 1);
+
+        RuntimeException ex = assertThrows(RuntimeException.class,
+                () -> orderService.placeOrder(1L, List.of(req)));
+
+        assertTrue(ex.getMessage().contains("Product not found"));
+    }
+
+    @Test
+    void testGetUserOrders_Success() {
+        Order order = new Order(testUser, BigDecimal.valueOf(500));
+        order.setId(1L);
+
+        OrderItem item = new OrderItem();
+        item.setId(101L);
+        item.setOrder(order);
+        item.setProduct(testProduct);
+        item.setPrice(BigDecimal.valueOf(100));
+        item.setQuantity(5);
+
+        order.setOrderItems(Set.of(item));
+
+        Page<Order> page = new PageImpl<>(List.of(order));
+        when(orderRepo.findByUserId(eq(1L), any(Pageable.class))).thenReturn(page);
+
+        Page<OrderDTO> result = orderService.getUserOrders(1L, 0, 10);
+
+        assertNotNull(result);
+        assertEquals(1, result.getTotalElements());
+        assertEquals("Test Product", result.getContent().get(0).getItems().get(0).getProductName());
+    }
+
+    @Test
+    void testGetAllOrders() {
+        Order order = new Order(testUser, BigDecimal.TEN);
+        when(orderRepo.findAll()).thenReturn(List.of(order));
+
+        List<Order> result = orderService.getAllOrders();
+
+        assertEquals(1, result.size());
+    }
+
+    @Test
+    void testGetOrderById_Success() {
+        Order order = new Order(testUser, BigDecimal.TEN);
+        order.setId(100L);
+
+        when(orderRepo.findByIdWithItems(100L)).thenReturn(Optional.of(order));
+
+        Order result = orderService.getOrderById(100L);
+
+        assertEquals(100L, result.getId());
+    }
+
+    @Test
+    void testGetOrderById_NotFound() {
+        when(orderRepo.findByIdWithItems(200L)).thenReturn(Optional.empty());
+
+        RuntimeException ex = assertThrows(RuntimeException.class,
+                () -> orderService.getOrderById(200L));
+
+        assertEquals("Order not found with ID: 200", ex.getMessage());
+    }
+
+    @Test
+    void testUpdateOrderStatus_Success() {
+        Order order = new Order(testUser, BigDecimal.TEN);
+        order.setId(1L);
+        order.setStatus(Order.OrderStatus.PENDING);
+
+        when(orderRepo.findById(1L)).thenReturn(Optional.of(order));
+        when(orderRepo.save(any(Order.class))).thenAnswer(inv -> inv.getArgument(0));
+
+        Order result = orderService.updateOrderStatus(1L, Order.OrderStatus.SHIPPED);
+
+        assertEquals(Order.OrderStatus.SHIPPED, result.getStatus());
+        verify(orderRepo, times(1)).save(order);
+    }
+
+    @Test
+    void testUpdateOrderStatus_NotFound() {
+        when(orderRepo.findById(5L)).thenReturn(Optional.empty());
+
+        RuntimeException ex = assertThrows(RuntimeException.class,
+                () -> orderService.updateOrderStatus(5L, Order.OrderStatus.DELIVERED));
+
+        assertEquals("Order not found with ID: 5", ex.getMessage());
+    }
+}

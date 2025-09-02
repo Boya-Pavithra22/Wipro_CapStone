@@ -1,0 +1,2371 @@
+Skip to content
+Chat history
+
+You said:
+Use OpenAPI/Swagger specification format — it’s widely supported and can auto-generate
+UI docs (Swagger UI).
+• Annotate your Spring Boot REST controllers using Swagger annotations (@Tag,
+@Operation, @ApiResponses, etc.).
+• Maintain up-to-date API contracts alongside code — ideally generated automatically from
+annotations.
+
+
+
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <parent>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-starter-parent</artifactId>
+        <version>3.2.0</version> <!-- Changed from 4.0.0-SNAPSHOT -->
+        <relativePath/>
+    </parent>
+    <groupId>com.wipro.ecommerce</groupId>
+    <artifactId>online-shopping-backend</artifactId>
+    <version>0.0.1-SNAPSHOT</version>
+    <name>online-shopping-backend</name>
+    <description>Online Shopping Backend API</description>
+    
+    <properties>
+        <java.version>17</java.version>
+    </properties>
+    
+    <dependencies>
+        <!-- Spring Boot Starters -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-web</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-data-jpa</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-security</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-validation</artifactId>
+        </dependency>
+
+        <!-- Database Driver - THIS WAS MISSING! -->
+        <dependency>
+           <groupId>mysql</groupId>
+  			<artifactId>mysql-connector-java</artifactId>
+  			<version>8.0.33</version>
+       </dependency>
+
+        <!-- JWT Dependencies - THESE WERE MISSING! -->
+        <dependency>
+            <groupId>io.jsonwebtoken</groupId>
+            <artifactId>jjwt-api</artifactId>
+            <version>0.11.5</version>
+        </dependency>
+        <dependency>
+            <groupId>io.jsonwebtoken</groupId>
+            <artifactId>jjwt-impl</artifactId>
+            <version>0.11.5</version>
+            <scope>runtime</scope>
+        </dependency>
+        <dependency>
+            <groupId>io.jsonwebtoken</groupId>
+            <artifactId>jjwt-jackson</artifactId>
+            <version>0.11.5</version>
+            <scope>runtime</scope>
+        </dependency>
+
+        <!-- Development Tools -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-devtools</artifactId>
+            <scope>runtime</scope>
+            <optional>true</optional>
+        </dependency>
+
+        <!-- Testing -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-test</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.security</groupId>
+            <artifactId>spring-security-test</artifactId>
+            <scope>test</scope>
+        </dependency>
+    </dependencies>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-maven-plugin</artifactId>
+            </plugin>
+        </plugins>
+    </build>
+</project>
+ChatGPT said:
+Got it ✅ — you want to integrate OpenAPI/Swagger into your Spring Boot backend so your REST APIs are auto-documented and browsable with Swagger UI.
+
+Here’s a step-by-step update to your pom.xml and controller setup:
+
+1. Add Swagger/OpenAPI Dependency
+Spring Boot 3.x uses springdoc-openapi (the official and widely adopted library for OpenAPI 3 + Swagger UI).
+
+Update your pom.xml:
+
+<dependencies>
+    <!-- Existing dependencies ... -->
+
+    <!-- OpenAPI / Swagger (springdoc) -->
+    <dependency>
+        <groupId>org.springdoc</groupId>
+        <artifactId>springdoc-openapi-starter-webmvc-ui</artifactId>
+        <version>2.5.0</version>
+    </dependency>
+</dependencies>
+2. Configure Swagger (Optional)
+You don’t have to configure anything; once added, Swagger UI is auto-enabled.
+But you can customize metadata:
+
+import io.swagger.v3.oas.annotations.OpenAPIDefinition;
+import io.swagger.v3.oas.annotations.info.Info;
+import io.swagger.v3.oas.annotations.info.Contact;
+import org.springframework.boot.SpringApplication;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
+
+@SpringBootApplication
+@OpenAPIDefinition(
+    info = @Info(
+        title = "Online Shopping API",
+        version = "1.0",
+        description = "REST API for managing online shopping system",
+        contact = @Contact(name = "Wipro E-Commerce Team", email = "support@wipro.com")
+    )
+)
+public class OnlineShoppingBackendApplication {
+    public static void main(String[] args) {
+        SpringApplication.run(OnlineShoppingBackendApplication.class, args);
+    }
+}
+3. Annotate Your Controllers
+Example: ProductController.java
+
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
+
+@RestController
+@RequestMapping("/api/products")
+@Tag(name = "Product Management", description = "CRUD APIs for Products")
+public class ProductController {
+
+    @GetMapping
+    @Operation(summary = "Get all products", description = "Retrieve a list of all products")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "Products retrieved successfully"),
+        @ApiResponse(responseCode = "500", description = "Internal server error")
+    })
+    public List<String> getAllProducts() {
+        return List.of("Laptop", "Phone", "Shoes");
+    }
+
+    @PostMapping
+    @Operation(summary = "Add a new product", description = "Create a new product in the catalog")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "201", description = "Product created successfully"),
+        @ApiResponse(responseCode = "400", description = "Invalid input data")
+    })
+    public String createProduct(@RequestBody String product) {
+        return "Created: " + product;
+    }
+}
+4. Access Swagger UI
+Run your app
+
+Open browser → http://localhost:8080/swagger-ui.html
+
+Or → http://localhost:8080/swagger-ui/index.html
+
+⚡ That’s it! Your API docs will always stay in sync with your code since annotations generate the OpenAPI contract automatically.
+
+👉 Do you want me to also show you how to export OpenAPI YAML/JSON spec (so you can share API contracts with frontend team or use Postman)?
+
+You said:
+package com.wipro.ecommerce.onlineshopping;
+
+import org.springframework.boot.SpringApplication;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.context.annotation.Bean;
+import org.springframework.web.servlet.config.annotation.CorsRegistry;
+import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
+
+@SpringBootApplication
+public class OnlineShoppingBackendApplication {
+
+	public static void main(String[] args) {
+		SpringApplication.run(OnlineShoppingBackendApplication.class, args);
+	}
+	
+	@Bean
+    public WebMvcConfigurer corsConfigurer() {
+        return new WebMvcConfigurer() {
+            @Override
+            public void addCorsMappings(CorsRegistry registry) {
+                registry.addMapping("/**") // allow CORS for all endpoints
+                        .allowedOrigins("http://localhost:3000")
+                        .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS" ,"PATCH")
+                        .allowCredentials(true);
+            }
+        };
+    }
+}
+
+
+
+package com.wipro.ecommerce.onlineshopping.controller;
+
+import com.wipro.ecommerce.onlineshopping.dto.*;
+import com.wipro.ecommerce.onlineshopping.entity.User;
+import com.wipro.ecommerce.onlineshopping.repository.UserRepository;
+import com.wipro.ecommerce.onlineshopping.security.JwtUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.authentication.*;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.core.Authentication;
+import org.springframework.web.bind.annotation.*;
+
+@RestController
+@RequestMapping("/auth")
+public class AuthController {
+
+    @Autowired private AuthenticationManager authManager;
+    @Autowired private UserRepository userRepo;
+    @Autowired private PasswordEncoder passwordEncoder;
+    @Autowired private JwtUtils jwtUtils;
+
+    @PostMapping("/register-customer")
+    public ResponseEntity<?> register(@RequestBody RegisterRequest req) {
+        if (userRepo.findByEmail(req.getEmail()).isPresent()) {
+            return ResponseEntity.badRequest().body("Email already exists");
+        }
+
+        User user = new User();
+        user.setName(req.getName());
+        user.setEmail(req.getEmail());
+        user.setPassword(passwordEncoder.encode(req.getPassword()));
+        user.setAddress(req.getAddress());
+        user.setPhone(req.getPhoneNumber());
+        user.setRole(User.Role.CUSTOMER); 
+
+        userRepo.save(user);
+        return ResponseEntity.ok("User registered successfully");
+    }
+    
+    @PostMapping("/register-admin")
+    public ResponseEntity<?> registerAdmin(@RequestBody RegisterRequest req) {
+        if (userRepo.findByEmail(req.getEmail()).isPresent()) {
+            return ResponseEntity.badRequest().body("Email already exists");
+        }
+
+        User user = new User();
+        user.setName(req.getName());
+        user.setEmail(req.getEmail());
+        user.setPassword(passwordEncoder.encode(req.getPassword()));
+        user.setRole(User.Role.ADMIN);
+
+        userRepo.save(user);
+        return ResponseEntity.ok("Admin registered successfully");
+    }
+
+    @PostMapping("/login")
+    public ResponseEntity<?> login(@RequestBody LoginRequest req) {
+        Authentication authentication = authManager.authenticate(
+                new UsernamePasswordAuthenticationToken(req.getEmail(), req.getPassword())
+        );
+
+        // Generate JWT
+        String jwt = jwtUtils.generateToken(req.getEmail());
+
+        // Fetch user to get role, name, email
+        User user = userRepo.findByEmail(req.getEmail())
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        // Return token + role + name + email
+        return ResponseEntity.ok(
+                new JwtResponse(jwt, user.getRole().name(), user.getName(), user.getEmail(), user.getId(),user.getAddress())
+        );
+    }
+}
+
+
+please edit in this files 
+ChatGPT said:
+Perfect 👍 Thanks for sharing your main class and AuthController.
+I’ll integrate Swagger / OpenAPI annotations directly into these files so your authentication APIs are auto-documented.
+
+✅ Updated OnlineShoppingBackendApplication.java
+package com.wipro.ecommerce.onlineshopping;
+
+import io.swagger.v3.oas.annotations.OpenAPIDefinition;
+import io.swagger.v3.oas.annotations.info.Contact;
+import io.swagger.v3.oas.annotations.info.Info;
+import org.springframework.boot.SpringApplication;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.context.annotation.Bean;
+import org.springframework.web.servlet.config.annotation.CorsRegistry;
+import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
+
+@SpringBootApplication
+@OpenAPIDefinition(
+    info = @Info(
+        title = "Online Shopping Backend API",
+        version = "1.0",
+        description = "REST API for authentication and online shopping operations",
+        contact = @Contact(name = "Wipro E-Commerce Team", email = "support@wipro.com")
+    )
+)
+public class OnlineShoppingBackendApplication {
+
+    public static void main(String[] args) {
+        SpringApplication.run(OnlineShoppingBackendApplication.class, args);
+    }
+
+    @Bean
+    public WebMvcConfigurer corsConfigurer() {
+        return new WebMvcConfigurer() {
+            @Override
+            public void addCorsMappings(CorsRegistry registry) {
+                registry.addMapping("/**")
+                        .allowedOrigins("http://localhost:3000")
+                        .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH")
+                        .allowCredentials(true);
+            }
+        };
+    }
+}
+✅ Updated AuthController.java
+package com.wipro.ecommerce.onlineshopping.controller;
+
+import com.wipro.ecommerce.onlineshopping.dto.*;
+import com.wipro.ecommerce.onlineshopping.entity.User;
+import com.wipro.ecommerce.onlineshopping.repository.UserRepository;
+import com.wipro.ecommerce.onlineshopping.security.JwtUtils;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.authentication.*;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.web.bind.annotation.*;
+
+@RestController
+@RequestMapping("/auth")
+@Tag(name = "Authentication", description = "APIs for user registration and login")
+public class AuthController {
+
+    @Autowired private AuthenticationManager authManager;
+    @Autowired private UserRepository userRepo;
+    @Autowired private PasswordEncoder passwordEncoder;
+    @Autowired private JwtUtils jwtUtils;
+
+    @PostMapping("/register-customer")
+    @Operation(summary = "Register a new customer", description = "Registers a new customer with basic details")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "Customer registered successfully"),
+        @ApiResponse(responseCode = "400", description = "Email already exists")
+    })
+    public ResponseEntity<?> register(@RequestBody RegisterRequest req) {
+        if (userRepo.findByEmail(req.getEmail()).isPresent()) {
+            return ResponseEntity.badRequest().body("Email already exists");
+        }
+
+        User user = new User();
+        user.setName(req.getName());
+        user.setEmail(req.getEmail());
+        user.setPassword(passwordEncoder.encode(req.getPassword()));
+        user.setAddress(req.getAddress());
+        user.setPhone(req.getPhoneNumber());
+        user.setRole(User.Role.CUSTOMER);
+
+        userRepo.save(user);
+        return ResponseEntity.ok("User registered successfully");
+    }
+
+    @PostMapping("/register-admin")
+    @Operation(summary = "Register a new admin", description = "Registers a new admin account")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "Admin registered successfully"),
+        @ApiResponse(responseCode = "400", description = "Email already exists")
+    })
+    public ResponseEntity<?> registerAdmin(@RequestBody RegisterRequest req) {
+        if (userRepo.findByEmail(req.getEmail()).isPresent()) {
+            return ResponseEntity.badRequest().body("Email already exists");
+        }
+
+        User user = new User();
+        user.setName(req.getName());
+        user.setEmail(req.getEmail());
+        user.setPassword(passwordEncoder.encode(req.getPassword()));
+        user.setRole(User.Role.ADMIN);
+
+        userRepo.save(user);
+        return ResponseEntity.ok("Admin registered successfully");
+    }
+
+    @PostMapping("/login")
+    @Operation(summary = "Login", description = "Authenticate user and return JWT token")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "Login successful"),
+        @ApiResponse(responseCode = "401", description = "Invalid email or password")
+    })
+    public ResponseEntity<?> login(@RequestBody LoginRequest req) {
+        Authentication authentication = authManager.authenticate(
+                new UsernamePasswordAuthenticationToken(req.getEmail(), req.getPassword())
+        );
+
+        // Generate JWT
+        String jwt = jwtUtils.generateToken(req.getEmail());
+
+        // Fetch user to get role, name, email
+        User user = userRepo.findByEmail(req.getEmail())
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        // Return token + role + user details
+        return ResponseEntity.ok(
+                new JwtResponse(jwt, user.getRole().name(), user.getName(),
+                        user.getEmail(), user.getId(), user.getAddress())
+        );
+    }
+}
+✅ What Changed?
+Added @OpenAPIDefinition in the main class → sets up global API metadata.
+
+Added @Tag, @Operation, and @ApiResponses to all endpoints in AuthController.
+
+Now your Swagger UI (/swagger-ui/index.html) will show:
+
+Auth section with register-customer, register-admin, login.
+
+Each endpoint will have descriptions and possible response codes.
+
+👉 Do you also want me to add OpenAPI schema models (RegisterRequest, LoginRequest, JwtResponse) so Swagger shows request/response fields clearly instead of just "object"?
+
+You said:
+yes please 
+ChatGPT said:
+Perfect 👍 Let’s enhance your DTOs with OpenAPI schema annotations so Swagger shows request/response fields nicely.
+
+We’ll use @Schema and @Schema(description = "...") from io.swagger.v3.oas.annotations.media.
+
+✅ Example DTOs with Swagger Annotations
+RegisterRequest.java
+package com.wipro.ecommerce.onlineshopping.dto;
+
+import io.swagger.v3.oas.annotations.media.Schema;
+
+@Schema(description = "Request object for user registration")
+public class RegisterRequest {
+
+    @Schema(description = "Full name of the user", example = "John Doe")
+    private String name;
+
+    @Schema(description = "Email address of the user", example = "john.doe@example.com")
+    private String email;
+
+    @Schema(description = "Password of the user (will be encrypted)", example = "password123")
+    private String password;
+
+    @Schema(description = "Phone number of the user", example = "+91-9876543210")
+    private String phoneNumber;
+
+    @Schema(description = "Address of the user", example = "123, Main Street, Bangalore")
+    private String address;
+
+    // Getters and setters
+    public String getName() { return name; }
+    public void setName(String name) { this.name = name; }
+
+    public String getEmail() { return email; }
+    public void setEmail(String email) { this.email = email; }
+
+    public String getPassword() { return password; }
+    public void setPassword(String password) { this.password = password; }
+
+    public String getPhoneNumber() { return phoneNumber; }
+    public void setPhoneNumber(String phoneNumber) { this.phoneNumber = phoneNumber; }
+
+    public String getAddress() { return address; }
+    public void setAddress(String address) { this.address = address; }
+}
+LoginRequest.java
+package com.wipro.ecommerce.onlineshopping.dto;
+
+import io.swagger.v3.oas.annotations.media.Schema;
+
+@Schema(description = "Request object for user login")
+public class LoginRequest {
+
+    @Schema(description = "Email address of the user", example = "john.doe@example.com")
+    private String email;
+
+    @Schema(description = "Password of the user", example = "password123")
+    private String password;
+
+    // Getters and setters
+    public String getEmail() { return email; }
+    public void setEmail(String email) { this.email = email; }
+
+    public String getPassword() { return password; }
+    public void setPassword(String password) { this.password = password; }
+}
+JwtResponse.java
+package com.wipro.ecommerce.onlineshopping.dto;
+
+import io.swagger.v3.oas.annotations.media.Schema;
+
+@Schema(description = "Response object returned after successful login")
+public class JwtResponse {
+
+    @Schema(description = "JWT access token", example = "eyJhbGciOiJIUzI1NiIsInR...")
+    private String token;
+
+    @Schema(description = "Role of the user", example = "CUSTOMER")
+    private String role;
+
+    @Schema(description = "Full name of the user", example = "John Doe")
+    private String name;
+
+    @Schema(description = "Email address of the user", example = "john.doe@example.com")
+    private String email;
+
+    @Schema(description = "Unique ID of the user", example = "101")
+    private Long id;
+
+    @Schema(description = "Address of the user", example = "123, Main Street, Bangalore")
+    private String address;
+
+    public JwtResponse(String token, String role, String name, String email, Long id, String address) {
+        this.token = token;
+        this.role = role;
+        this.name = name;
+        this.email = email;
+        this.id = id;
+        this.address = address;
+    }
+
+    // Getters
+    public String getToken() { return token; }
+    public String getRole() { return role; }
+    public String getName() { return name; }
+    public String getEmail() { return email; }
+    public Long getId() { return id; }
+    public String getAddress() { return address; }
+}
+✅ What you’ll see in Swagger UI
+Register API → will show fields (name, email, password, phoneNumber, address) with descriptions & examples.
+
+Login API → will show (email, password).
+
+Login Response → clearly lists (token, role, name, email, id, address).
+
+👉 Do you also want me to make Swagger show example requests/responses automatically (so frontend devs can copy-paste sample JSON directly)?
+
+You said:
+package com.wipro.ecommerce.onlineshopping.dto;
+
+public class RegisterRequest {
+    private String name;
+    private String email;
+    private String password;
+    private String address;
+    private String phoneNumber;
+    
+	public String getName() {
+		return name;
+	}
+	public void setName(String name) {
+		this.name = name;
+	}
+	public String getEmail() {
+		return email;
+	}
+	public void setEmail(String email) {
+		this.email = email;
+	}
+	public String getPassword() {
+		return password;
+	}
+	public void setPassword(String password) {
+		this.password = password;
+	}
+	public String getAddress() {
+		return address;
+	}
+	public void setAddress(String address) {
+		this.address = address;
+	}
+	public String getPhoneNumber() {
+		return phoneNumber;
+	}
+	public void setPhoneNumber(String phoneNumber) {
+		this.phoneNumber = phoneNumber;
+	}
+
+
+
+}
+
+
+
+package com.wipro.ecommerce.onlineshopping.dto;
+
+public class LoginRequest {
+    private String email;
+    private String password;
+    
+	public String getEmail() {
+		return email;
+	}
+	public void setEmail(String email) {
+		this.email = email;
+	}
+	public String getPassword() {
+		return password;
+	}
+	public void setPassword(String password) {
+		this.password = password;
+	}
+    
+    
+    
+}package com.wipro.ecommerce.onlineshopping.dto;
+
+public class JwtResponse {
+    private String token;
+    private String role; 
+    private String name;
+    private String email;
+    private Long userId;
+    private String address;
+
+    public JwtResponse(String token, String role,String name,String email,Long userId,String address) {
+        this.token = token;
+        this.role = role;
+        this.name = name;
+        this.email = email;
+        this.userId = userId;
+        this.address= address;
+        
+    }
+
+    public String getToken() { return token; }
+    public void setToken(String token) { this.token = token; }
+
+    public String getRole() { return role; }
+    public void setRole(String role) { this.role = role; }
+
+    public String getName() { return name; }
+    public void setName(String name) { this.name = name; }
+
+    public String getEmail() { return email; }
+    public void setEmail(String email) { this.email = email; }
+
+	public Long getUserId() {
+		return userId;
+	}
+
+	public void setUserId(Long userId) {
+		this.userId = userId;
+	}
+
+	public String getAddress() {
+		return address;
+	}
+
+	public void setAddress(String address) {
+		this.address = address;
+	}
+    
+    
+    
+}
+
+edit in this 
+ChatGPT said:
+Got it 👍 I’ll update your DTOs (RegisterRequest, LoginRequest, JwtResponse) with Swagger/OpenAPI annotations so that in Swagger UI you see request/response fields with descriptions and examples.
+
+Here are the edited versions:
+
+✅ RegisterRequest.java
+package com.wipro.ecommerce.onlineshopping.dto;
+
+import io.swagger.v3.oas.annotations.media.Schema;
+
+@Schema(description = "Request object for user registration")
+public class RegisterRequest {
+
+    @Schema(description = "Full name of the user", example = "John Doe")
+    private String name;
+
+    @Schema(description = "Email address of the user", example = "john.doe@example.com")
+    private String email;
+
+    @Schema(description = "Password of the user (will be encrypted)", example = "password123")
+    private String password;
+
+    @Schema(description = "Address of the user", example = "123, MG Road, Bangalore")
+    private String address;
+
+    @Schema(description = "Phone number of the user", example = "+91-9876543210")
+    private String phoneNumber;
+
+    // Getters and setters
+    public String getName() { return name; }
+    public void setName(String name) { this.name = name; }
+
+    public String getEmail() { return email; }
+    public void setEmail(String email) { this.email = email; }
+
+    public String getPassword() { return password; }
+    public void setPassword(String password) { this.password = password; }
+
+    public String getAddress() { return address; }
+    public void setAddress(String address) { this.address = address; }
+
+    public String getPhoneNumber() { return phoneNumber; }
+    public void setPhoneNumber(String phoneNumber) { this.phoneNumber = phoneNumber; }
+}
+✅ LoginRequest.java
+package com.wipro.ecommerce.onlineshopping.dto;
+
+import io.swagger.v3.oas.annotations.media.Schema;
+
+@Schema(description = "Request object for user login")
+public class LoginRequest {
+
+    @Schema(description = "Email address of the user", example = "john.doe@example.com")
+    private String email;
+
+    @Schema(description = "Password of the user", example = "password123")
+    private String password;
+
+    // Getters and setters
+    public String getEmail() { return email; }
+    public void setEmail(String email) { this.email = email; }
+
+    public String getPassword() { return password; }
+    public void setPassword(String password) { this.password = password; }
+}
+✅ JwtResponse.java
+package com.wipro.ecommerce.onlineshopping.dto;
+
+import io.swagger.v3.oas.annotations.media.Schema;
+
+@Schema(description = "Response object returned after successful login")
+public class JwtResponse {
+
+    @Schema(description = "JWT access token", example = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...")
+    private String token;
+
+    @Schema(description = "Role of the user", example = "CUSTOMER")
+    private String role;
+
+    @Schema(description = "Full name of the user", example = "John Doe")
+    private String name;
+
+    @Schema(description = "Email address of the user", example = "john.doe@example.com")
+    private String email;
+
+    @Schema(description = "Unique ID of the user", example = "101")
+    private Long userId;
+
+    @Schema(description = "Address of the user", example = "123, MG Road, Bangalore")
+    private String address;
+
+    public JwtResponse(String token, String role, String name, String email, Long userId, String address) {
+        this.token = token;
+        this.role = role;
+        this.name = name;
+        this.email = email;
+        this.userId = userId;
+        this.address = address;
+    }
+
+    // Getters & Setters
+    public String getToken() { return token; }
+    public void setToken(String token) { this.token = token; }
+
+    public String getRole() { return role; }
+    public void setRole(String role) { this.role = role; }
+
+    public String getName() { return name; }
+    public void setName(String name) { this.name = name; }
+
+    public String getEmail() { return email; }
+    public void setEmail(String email) { this.email = email; }
+
+    public Long getUserId() { return userId; }
+    public void setUserId(Long userId) { this.userId = userId; }
+
+    public String getAddress() { return address; }
+    public void setAddress(String address) { this.address = address; }
+}
+✅ Now, in Swagger UI, your endpoints (/auth/register-customer, /auth/register-admin, /auth/login) will show:
+
+Clear field descriptions.
+
+Example values for easier testing.
+
+Properly structured request and response objects.
+
+👉 Do you also want me to add @ExampleObject with sample JSON bodies for each endpoint so Swagger UI shows complete request/response JSON examples?
+
+You said:
+how to run this swagger 
+ChatGPT said:
+Great question 👍 Let’s get your Swagger (springdoc-openapi) running in your Spring Boot project.
+
+✅ Steps to Run Swagger in Spring Boot 3
+1. Add Dependency in pom.xml
+Make sure you added the correct springdoc-openapi dependency:
+
+<dependency>
+    <groupId>org.springdoc</groupId>
+    <artifactId>springdoc-openapi-starter-webmvc-ui</artifactId>
+    <version>2.5.0</version>
+</dependency>
+👉 You don’t need springfox anymore (it’s not compatible with Spring Boot 3).
+
+2. Start Your Spring Boot App
+Run your application normally:
+
+mvn spring-boot:run
+or from your IDE (OnlineShoppingBackendApplication.java → Run).
+
+3. Open Swagger UI
+Once the app is running, open your browser and visit:
+
+Swagger UI (Interactive Docs):
+👉 http://localhost:8080/swagger-ui/index.html
+
+OpenAPI JSON (API contract):
+👉 http://localhost:8080/v3/api-docs
+
+OpenAPI YAML (if enabled):
+👉 http://localhost:8080/v3/api-docs.yaml
+
+4. What You’ll See
+A Swagger UI page listing your APIs.
+
+Categories (Authentication, Product Management, etc.) based on @Tag.
+
+Each endpoint expandable with:
+
+Parameters
+
+Request body schema + example
+
+Response schemas + example JSON
+
+“Try it out” button (you can test APIs directly from the browser).
+
+5. (Optional) Customize Swagger Path
+If you don’t like /swagger-ui/index.html, you can change it in application.properties:
+
+# Change Swagger UI path
+springdoc.swagger-ui.path=/api-docs
+Now Swagger UI will be available at:
+👉 http://localhost:8080/api-docs
+
+⚡ That’s it — as long as your dependency is added, Springdoc auto-scans your controllers and DTOs and generates Swagger UI.
+
+👉 Do you want me to also show you how to add authentication support in Swagger (so you can test secured endpoints with JWT directly from Swagger UI)?
+
+You said:
+i ran spring boot ... tomcat started .. now i want to check the swagger how can i check 
+
+
+# Database Configuration
+spring.datasource.url=jdbc:mysql://localhost:3306/onlineShopping
+spring.datasource.username=root
+spring.datasource.password=pavithra
+spring.datasource.driver-class-name=com.mysql.cj.jdbc.Driver
+
+# JPA/Hibernate Configuration
+spring.jpa.hibernate.ddl-auto=update
+spring.jpa.show-sql=true
+spring.jpa.properties.hibernate.dialect=org.hibernate.dialect.MySQL8Dialect
+spring.jpa.properties.hibernate.format_sql=true
+
+# Server Configuration
+server.port=9080
+server.servlet.context-path=/api
+
+# JWT Configuration
+app.jwt.secret=mysuperlongsecretkeythatshouldbeatleast64characterslongandsecure1234567890
+app.jwt.expiration-ms=86400000
+
+# File Upload Configuration
+spring.servlet.multipart.max-file-size=10MB
+spring.servlet.multipart.max-request-size=10MB
+ChatGPT said:
+Perfect 👍 You already started your Spring Boot app, and I see you configured:
+
+Port: 9080
+
+Context path: /api
+
+That means all URLs are prefixed with http://localhost:9080/api.
+
+🔎 How to access Swagger now
+Swagger UI (main docs page):
+👉 http://localhost:9080/api/swagger-ui/index.html
+
+OpenAPI JSON contract:
+👉 http://localhost:9080/api/v3/api-docs
+
+OpenAPI YAML contract (optional):
+👉 http://localhost:9080/api/v3/api-docs.yaml
+
+✅ Things to double-check if Swagger is not showing:
+Did you add this dependency in your pom.xml?
+
+<dependency>
+    <groupId>org.springdoc</groupId>
+    <artifactId>springdoc-openapi-starter-webmvc-ui</artifactId>
+    <version>2.5.0</version>
+</dependency>
+(Restart the app after adding.)
+
+No extra Swagger config is required — springdoc auto-detects your controllers.
+
+Since you set server.servlet.context-path=/api, all Swagger endpoints are under /api.
+
+⚡ So open your browser at:
+👉 http://localhost:9080/api/swagger-ui/index.html
+
+You should see your APIs grouped (e.g., Authentication) with register-customer, register-admin, login.
+
+Do you want me to also add JWT auth support inside Swagger UI (so you can log in, paste the token, and test secured endpoints directly from Swagger)?
+
+You said:
+package com.wipro.ecommerce.onlineshopping.controller;
+
+import com.wipro.ecommerce.onlineshopping.entity.User;
+import com.wipro.ecommerce.onlineshopping.service.UserService;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+
+@RestController
+@RequestMapping("/users")
+public class UserController {
+
+    private final UserService userService;
+    public UserController(UserService userService) {
+        this.userService = userService;
+    }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<User> getUser(@PathVariable Long id) {
+        return ResponseEntity.ok(userService.getUserById(id));
+    }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<User> updateUser(@PathVariable Long id, @RequestBody User updatedUser) {
+        return ResponseEntity.ok(userService.updateUser(id, updatedUser));
+    }
+}
+
+
+add schema for this 
+ChatGPT said:
+Nice 👍 You want to make your UserController Swagger-friendly by adding OpenAPI annotations and schema docs for the User entity.
+
+Here’s the full edit:
+
+✅ User.java (Entity with Swagger schema)
+package com.wipro.ecommerce.onlineshopping.entity;
+
+import io.swagger.v3.oas.annotations.media.Schema;
+import jakarta.persistence.*;
+
+@Entity
+@Table(name = "users")
+@Schema(description = "Represents a user in the system")
+public class User {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Schema(description = "Unique identifier of the user", example = "101")
+    private Long id;
+
+    @Schema(description = "Full name of the user", example = "John Doe")
+    private String name;
+
+    @Schema(description = "Email address of the user", example = "john.doe@example.com")
+    private String email;
+
+    @Schema(description = "Hashed password of the user", example = "$2a$10$encrypted")
+    private String password;
+
+    @Schema(description = "User address", example = "123, MG Road, Bangalore")
+    private String address;
+
+    @Schema(description = "Phone number of the user", example = "+91-9876543210")
+    private String phone;
+
+    @Enumerated(EnumType.STRING)
+    @Schema(description = "Role of the user", example = "CUSTOMER")
+    private Role role;
+
+    public enum Role { CUSTOMER, ADMIN }
+
+    // Getters and setters ...
+}
+✅ UserController.java (with Swagger docs)
+package com.wipro.ecommerce.onlineshopping.controller;
+
+import com.wipro.ecommerce.onlineshopping.entity.User;
+import com.wipro.ecommerce.onlineshopping.service.UserService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+
+@RestController
+@RequestMapping("/users")
+@Tag(name = "User Management", description = "APIs for managing users")
+public class UserController {
+
+    private final UserService userService;
+    public UserController(UserService userService) {
+        this.userService = userService;
+    }
+
+    @GetMapping("/{id}")
+    @Operation(summary = "Get user by ID", description = "Retrieve a user by their unique ID")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "User found successfully"),
+        @ApiResponse(responseCode = "404", description = "User not found")
+    })
+    public ResponseEntity<User> getUser(@PathVariable Long id) {
+        return ResponseEntity.ok(userService.getUserById(id));
+    }
+
+    @PutMapping("/{id}")
+    @Operation(summary = "Update user details", description = "Update an existing user by their ID")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "User updated successfully"),
+        @ApiResponse(responseCode = "404", description = "User not found"),
+        @ApiResponse(responseCode = "400", description = "Invalid request data")
+    })
+    public ResponseEntity<User> updateUser(@PathVariable Long id, @RequestBody User updatedUser) {
+        return ResponseEntity.ok(userService.updateUser(id, updatedUser));
+    }
+}
+✅ What You’ll See in Swagger UI
+A “User Management” section with endpoints:
+
+GET /users/{id} → Shows schema of User in the response.
+
+PUT /users/{id} → Shows request body schema (User) with fields + examples.
+
+Proper response codes (200, 404, 400).
+
+👉 Do you also want me to make example JSON request/response bodies appear in Swagger automatically (so you don’t have to type them while testing PUT /users/{id})?
+
+You said:
+package com.wipro.ecommerce.onlineshopping.entity;
+
+import jakarta.persistence.*;
+import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Size;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import java.util.HashSet;
+import java.util.Set;
+
+
+@Entity
+@Table(name = "users")
+public class User {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    @NotBlank
+    @Size(max = 100)
+    private String name;
+
+    @NotBlank
+    @Email
+    @Size(max = 100)
+    @Column(unique = true)
+    private String email;
+
+    @NotBlank
+    @Size(max = 255)
+    @JsonIgnore
+    private String password;
+
+    @Enumerated(EnumType.STRING)
+    private Role role = Role.CUSTOMER;
+
+    private String address;
+    
+    @Size(max = 20)
+    private String phone;
+
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @JsonIgnore
+    private Set<Cart> cartItems = new HashSet<>();
+
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @JsonIgnore
+    private Set<Order> orders = new HashSet<>();
+
+    // Constructors
+    public User() {}
+
+    public User(String name, String email, String password) {
+        this.name = name;
+        this.email = email;
+        this.password = password;
+    }
+
+    // Getters and Setters
+    public Long getId() { return id; }
+    public void setId(Long id) { this.id = id; }
+
+    public String getName() { return name; }
+    public void setName(String name) { this.name = name; }
+
+    public String getEmail() { return email; }
+    public void setEmail(String email) { this.email = email; }
+
+    public String getPassword() { return password; }
+    public void setPassword(String password) { this.password = password; }
+
+    public Role getRole() { return role; }
+    public void setRole(Role role) { this.role = role; }
+
+    public String getAddress() { return address; }
+    public void setAddress(String address) { this.address = address; }
+
+    public String getPhone() { return phone; }
+    public void setPhone(String phone) { this.phone = phone; }
+
+    public Set<Cart> getCartItems() { return cartItems; }
+    public void setCartItems(Set<Cart> cartItems) { this.cartItems = cartItems; }
+
+    public Set<Order> getOrders() { return orders; }
+    public void setOrders(Set<Order> orders) { this.orders = orders; }
+
+    public enum Role {
+        CUSTOMER, ADMIN
+    }
+}
+ChatGPT said:
+Perfect 👌 You already have a clean User entity with JPA + validation. To make this Swagger/OpenAPI friendly (so that your Swagger UI shows request/response schemas with field descriptions + examples), you can add @Schema annotations from io.swagger.v3.oas.annotations.media.Schema.
+
+Here’s your edited User entity with schema docs:
+
+package com.wipro.ecommerce.onlineshopping.entity;
+
+import jakarta.persistence.*;
+import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Size;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import io.swagger.v3.oas.annotations.media.Schema;
+
+import java.util.HashSet;
+import java.util.Set;
+
+@Entity
+@Table(name = "users")
+@Schema(description = "Represents a user in the online shopping system")
+public class User {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Schema(description = "Unique identifier of the user", example = "101")
+    private Long id;
+
+    @NotBlank
+    @Size(max = 100)
+    @Schema(description = "Full name of the user", example = "John Doe")
+    private String name;
+
+    @NotBlank
+    @Email
+    @Size(max = 100)
+    @Column(unique = true)
+    @Schema(description = "Email address of the user", example = "john.doe@example.com")
+    private String email;
+
+    @NotBlank
+    @Size(max = 255)
+    @JsonIgnore
+    @Schema(description = "Hashed password of the user", example = "$2a$10$encryptedPasswordHash", accessMode = Schema.AccessMode.WRITE_ONLY)
+    private String password;
+
+    @Enumerated(EnumType.STRING)
+    @Schema(description = "Role of the user", example = "CUSTOMER")
+    private Role role = Role.CUSTOMER;
+
+    @Schema(description = "Residential address of the user", example = "123 MG Road, Bangalore")
+    private String address;
+
+    @Size(max = 20)
+    @Schema(description = "Phone number of the user", example = "+91-9876543210")
+    private String phone;
+
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @JsonIgnore
+    @Schema(description = "List of cart items belonging to the user (ignored in API docs)")
+    private Set<Cart> cartItems = new HashSet<>();
+
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @JsonIgnore
+    @Schema(description = "List of orders placed by the user (ignored in API docs)")
+    private Set<Order> orders = new HashSet<>();
+
+    // Constructors
+    public User() {}
+
+    public User(String name, String email, String password) {
+        this.name = name;
+        this.email = email;
+        this.password = password;
+    }
+
+    // Getters and Setters
+    public Long getId() { return id; }
+    public void setId(Long id) { this.id = id; }
+
+    public String getName() { return name; }
+    public void setName(String name) { this.name = name; }
+
+    public String getEmail() { return email; }
+    public void setEmail(String email) { this.email = email; }
+
+    public String getPassword() { return password; }
+    public void setPassword(String password) { this.password = password; }
+
+    public Role getRole() { return role; }
+    public void setRole(Role role) { this.role = role; }
+
+    public String getAddress() { return address; }
+    public void setAddress(String address) { this.address = address; }
+
+    public String getPhone() { return phone; }
+    public void setPhone(String phone) { this.phone = phone; }
+
+    public Set<Cart> getCartItems() { return cartItems; }
+    public void setCartItems(Set<Cart> cartItems) { this.cartItems = cartItems; }
+
+    public Set<Order> getOrders() { return orders; }
+    public void setOrders(Set<Order> orders) { this.orders = orders; }
+
+    public enum Role {
+        CUSTOMER, ADMIN
+    }
+}
+🔹 What Changed?
+Added @Schema annotations for:
+
+Field descriptions.
+
+Example values (shown in Swagger request/response bodies).
+
+accessMode = WRITE_ONLY for password → visible only in request, hidden in response.
+
+Kept cartItems and orders hidden from API docs (@JsonIgnore + doc note).
+
+👉 Do you want me to also update your UserController so Swagger shows sample request/response JSON automatically (not just schema)? That way you can test PUT /users/{id} directly with an example body.
+
+You said:
+package com.wipro.ecommerce.onlineshopping.controller;
+
+import com.wipro.ecommerce.onlineshopping.entity.Cart;
+import com.wipro.ecommerce.onlineshopping.service.CartService;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
+
+
+@RestController
+@RequestMapping("/cart")
+public class CartController {
+
+    private final CartService cartService;
+
+    public CartController(CartService cartService) {
+        this.cartService = cartService;
+    }
+
+    // POST /api/cart → Add item to cart
+    @PostMapping
+    public ResponseEntity<Cart> addItem(@RequestParam Long userId,
+                                        @RequestParam Long productId,
+                                        @RequestParam Integer quantity) {
+        return ResponseEntity.ok(cartService.addItem(userId, productId, quantity));
+    }
+
+    // GET /api/cart/{userId} → View user’s cart
+    @GetMapping("/{userId}")
+    public ResponseEntity<List<Cart>> getUserCart(@PathVariable Long userId) {
+        return ResponseEntity.ok(cartService.getUserCart(userId));
+    }
+    
+ // Update quantity of a cart item
+    @PutMapping("/{cartId}")
+    public ResponseEntity<Cart> updateQuantity(@PathVariable Long cartId,
+                                               @RequestParam Integer quantity) {
+        Cart updatedCart = cartService.updateQuantity(cartId, quantity);
+        return ResponseEntity.ok(updatedCart);
+    }
+
+
+    // DELETE /api/cart/{id} → Remove item
+    @DeleteMapping("/{id}")
+    public ResponseEntity<String> removeItem(@PathVariable Long id) {
+        cartService.removeItem(id);
+        return ResponseEntity.ok("Item removed from cart");
+    }
+}
+
+
+
+package com.wipro.ecommerce.onlineshopping.entity;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
+import jakarta.persistence.*;
+import jakarta.validation.constraints.Min;
+
+@Entity
+@Table(name = "cart")
+public class Cart {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id", nullable = false)
+    @JsonIgnore
+    private User user;
+
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "product_id", nullable = false)
+    private Product product;
+
+    @Min(1)
+    private Integer quantity;
+
+    // Constructors
+    public Cart() {}
+
+    public Cart(User user, Product product, Integer quantity) {
+        this.user = user;
+        this.product = product;
+        this.quantity = quantity;
+    }
+
+    // Getters and Setters
+    public Long getId() { return id; }
+    public void setId(Long id) { this.id = id; }
+
+    public User getUser() { return user; }
+    public void setUser(User user) { this.user = user; }
+
+    public Product getProduct() { return product; }
+    public void setProduct(Product product) { this.product = product; }
+
+    public Integer getQuantity() { return quantity; }
+    public void setQuantity(Integer quantity) { this.quantity = quantity; }
+}
+
+
+
+package com.wipro.ecommerce.onlineshopping.service;
+
+import com.wipro.ecommerce.onlineshopping.entity.Cart;
+import com.wipro.ecommerce.onlineshopping.entity.Product;
+import com.wipro.ecommerce.onlineshopping.entity.User;
+import com.wipro.ecommerce.onlineshopping.repository.CartRepository;
+import com.wipro.ecommerce.onlineshopping.repository.ProductRepository;
+import com.wipro.ecommerce.onlineshopping.repository.UserRepository;
+import org.springframework.stereotype.Service;
+
+import java.util.List;
+
+@Service
+public class CartService {
+
+    private final CartRepository cartRepo;
+    private final UserRepository userRepo;
+    private final ProductRepository productRepo;
+
+    public CartService(CartRepository cartRepo, UserRepository userRepo, ProductRepository productRepo) {
+        this.cartRepo = cartRepo;
+        this.userRepo = userRepo;
+        this.productRepo = productRepo;
+    }
+
+    public Cart addItem(Long userId, Long productId, Integer quantity) {
+        Cart existing = cartRepo.findByUserIdAndProductId(userId, productId);
+        if (existing != null) {
+            existing.setQuantity(existing.getQuantity() + quantity);
+            return cartRepo.save(existing);
+        }
+
+        // Else create new cart item
+        User user = userRepo.findById(userId).orElseThrow();
+        Product product = productRepo.findById(productId).orElseThrow();
+        Cart cart = new Cart(user, product, quantity);
+        return cartRepo.save(cart);
+    }
+
+    public List<Cart> getUserCart(Long userId) {
+        User user = userRepo.findById(userId)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+        return cartRepo.findByUser(user);
+    }
+
+    public void removeItem(Long id) {
+        if (!cartRepo.existsById(id)) {
+            throw new RuntimeException("Cart item not found");
+        }
+        cartRepo.deleteById(id);
+    }
+    
+    public Cart updateQuantity(Long cartId, Integer quantity) {
+        Cart cartItem = cartRepo.findById(cartId)
+                .orElseThrow(() -> new RuntimeException("Cart item not found"));
+        cartItem.setQuantity(quantity);
+        return cartRepo.save(cartItem);
+    }
+
+}
+ChatGPT said:
+Got it 👍 You already have CartController, Cart entity, and CartService.
+To make your Swagger/OpenAPI documentation clear and user-friendly, you should annotate the controller methods with @Operation, @ApiResponse, and add schema references for Cart.
+
+Here’s a cleaned-up and documented version of your CartController using springdoc-openapi:
+
+package com.wipro.ecommerce.onlineshopping.controller;
+
+import com.wipro.ecommerce.onlineshopping.entity.Cart;
+import com.wipro.ecommerce.onlineshopping.service.CartService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
+
+@RestController
+@RequestMapping("/cart")
+@Tag(name = "Cart", description = "Manage shopping cart operations")
+public class CartController {
+
+    private final CartService cartService;
+
+    public CartController(CartService cartService) {
+        this.cartService = cartService;
+    }
+
+    @Operation(
+        summary = "Add item to cart",
+        description = "Adds a product to the user's cart. If product already exists in cart, increments the quantity."
+    )
+    @ApiResponse(
+        responseCode = "200",
+        description = "Item added to cart successfully",
+        content = @Content(mediaType = "application/json", schema = @Schema(implementation = Cart.class))
+    )
+    @PostMapping
+    public ResponseEntity<Cart> addItem(
+            @RequestParam Long userId,
+            @RequestParam Long productId,
+            @RequestParam Integer quantity) {
+        return ResponseEntity.ok(cartService.addItem(userId, productId, quantity));
+    }
+
+    @Operation(
+        summary = "Get user cart",
+        description = "Retrieves all items in the user's cart."
+    )
+    @ApiResponse(
+        responseCode = "200",
+        description = "User cart retrieved successfully",
+        content = @Content(mediaType = "application/json", schema = @Schema(implementation = Cart.class))
+    )
+    @GetMapping("/{userId}")
+    public ResponseEntity<List<Cart>> getUserCart(@PathVariable Long userId) {
+        return ResponseEntity.ok(cartService.getUserCart(userId));
+    }
+
+    @Operation(
+        summary = "Update quantity",
+        description = "Updates the quantity of a cart item."
+    )
+    @ApiResponse(
+        responseCode = "200",
+        description = "Cart item updated successfully",
+        content = @Content(mediaType = "application/json", schema = @Schema(implementation = Cart.class))
+    )
+    @PutMapping("/{cartId}")
+    public ResponseEntity<Cart> updateQuantity(
+            @PathVariable Long cartId,
+            @RequestParam Integer quantity) {
+        return ResponseEntity.ok(cartService.updateQuantity(cartId, quantity));
+    }
+
+    @Operation(
+        summary = "Remove item",
+        description = "Removes an item from the cart."
+    )
+    @ApiResponse(
+        responseCode = "200",
+        description = "Item removed successfully",
+        content = @Content(mediaType = "application/json", schema = @Schema(implementation = String.class))
+    )
+    @DeleteMapping("/{id}")
+    public ResponseEntity<String> removeItem(@PathVariable Long id) {
+        cartService.removeItem(id);
+        return ResponseEntity.ok("Item removed from cart");
+    }
+}
+✅ What this adds:
+@Tag → Groups this controller in Swagger as Cart
+
+@Operation → Title + description for each API
+
+@ApiResponse → Defines response schemas (Cart.class or String)
+
+@Schema(implementation = Cart.class) → Tells Swagger to use your Cart entity schema
+
+Example in Swagger UI
+POST /api/cart
+Parameters: userId, productId, quantity
+Response body: Cart JSON schema
+
+GET /api/cart/{userId}
+Response: list of cart items
+
+👉 Next step: Do you also want me to add Swagger schema annotations (@Schema) in your Cart entity (so fields like product, user, quantity are documented properly in Swagger models)?
+
+You said:
+how to check api-docs
+ChatGPT said:
+Since you’re using Spring Boot with springdoc-openapi, the OpenAPI spec and Swagger UI are exposed automatically once you start your app ✅
+
+Given your application.properties:
+
+server.port=9080
+server.servlet.context-path=/api
+👉 Your Swagger endpoints will be:
+
+Swagger UI (interactive API docs):
+http://localhost:9080/api/swagger-ui.html
+or
+http://localhost:9080/api/swagger-ui/index.html
+
+Raw OpenAPI JSON:
+http://localhost:9080/api/v3/api-docs
+
+Raw OpenAPI YAML:
+http://localhost:9080/api/v3/api-docs.yaml
+
+✅ Steps to check:
+Run your Spring Boot app → you said Tomcat already started.
+
+Open a browser and go to
+👉 http://localhost:9080/api/swagger-ui.html
+
+You should see Swagger UI with all controllers (User, Cart, etc.) listed.
+
+You can test APIs directly from there (POST, GET, PUT, DELETE).
+
+⚡ Question for you: Do you want me to also show how to customize the Swagger UI path (for example /docs instead of /swagger-ui.html)?
+
+You said:
+AuthController.java
+File
+CartController.java
+File
+OrderController.java
+File
+UserController.java
+File
+ProductController.java
+File
+PaymentController.java
+File
+Please add junit test cases for this files . Use junit 5 and mockito 
+ChatGPT said:
+Perfect 👍 You uploaded all your controller files.
+Now I’ll help you generate JUnit 5 + Mockito test cases for each of them.
+
+We’ll use:
+
+@WebMvcTest for controller layer tests
+
+MockMvc to simulate HTTP calls
+
+@MockBean to mock service dependencies
+
+Mockito.when(...) and verify(...) to define behavior and validate interactions
+
+Here’s the structure I’ll create:
+
+src/test/java/com/wipro/ecommerce/onlineshopping/controller/
+   ├── AuthControllerTest.java
+   ├── CartControllerTest.java
+   ├── OrderControllerTest.java
+   ├── UserControllerTest.java
+   ├── ProductControllerTest.java
+   └── PaymentControllerTest.java
+✅ Example: CartControllerTest.java
+package com.wipro.ecommerce.onlineshopping.controller;
+
+import com.wipro.ecommerce.onlineshopping.entity.Cart;
+import com.wipro.ecommerce.onlineshopping.entity.Product;
+import com.wipro.ecommerce.onlineshopping.entity.User;
+import com.wipro.ecommerce.onlineshopping.service.CartService;
+import org.junit.jupiter.api.Test;
+import org.mockito.Mockito;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.http.MediaType;
+import org.springframework.test.web.servlet.MockMvc;
+
+import java.util.Collections;
+
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+
+@WebMvcTest(CartController.class)
+class CartControllerTest {
+
+    @Autowired
+    private MockMvc mockMvc;
+
+    @MockBean
+    private CartService cartService;
+
+    @Test
+    void testAddItem() throws Exception {
+        User user = new User("John", "john@example.com", "pass");
+        Product product = new Product();
+        product.setId(1L);
+
+        Cart cart = new Cart(user, product, 2);
+        Mockito.when(cartService.addItem(1L, 1L, 2)).thenReturn(cart);
+
+        mockMvc.perform(post("/cart")
+                .param("userId", "1")
+                .param("productId", "1")
+                .param("quantity", "2"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.quantity").value(2));
+    }
+
+    @Test
+    void testGetUserCart() throws Exception {
+        Mockito.when(cartService.getUserCart(1L)).thenReturn(Collections.emptyList());
+
+        mockMvc.perform(get("/cart/1"))
+                .andExpect(status().isOk())
+                .andExpect(content().json("[]"));
+    }
+
+    @Test
+    void testUpdateQuantity() throws Exception {
+        User user = new User("John", "john@example.com", "pass");
+        Product product = new Product();
+        product.setId(1L);
+
+        Cart cart = new Cart(user, product, 5);
+        Mockito.when(cartService.updateQuantity(10L, 5)).thenReturn(cart);
+
+        mockMvc.perform(put("/cart/10").param("quantity", "5"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.quantity").value(5));
+    }
+
+    @Test
+    void testRemoveItem() throws Exception {
+        mockMvc.perform(delete("/cart/10"))
+                .andExpect(status().isOk())
+                .andExpect(content().string("Item removed from cart"));
+
+        Mockito.verify(cartService).removeItem(10L);
+    }
+}
+👉 I can now generate similar test classes for all 6 controllers you uploaded (AuthController, OrderController, UserController, ProductController, PaymentController).
+
+Would you like me to create all six test files at once (ready to paste into your test folder), or go one by one starting with CartControllerTest?
+
+You said:
+yes 
+ChatGPT said:
+Got it ✅
+I’ll generate JUnit 5 + Mockito test classes for all 6 controllers you uploaded.
+
+Here are the files (ready to place inside
+src/test/java/com/wipro/ecommerce/onlineshopping/controller/):
+
+🔹 AuthControllerTest.java
+package com.wipro.ecommerce.onlineshopping.controller;
+
+import com.wipro.ecommerce.onlineshopping.entity.User;
+import com.wipro.ecommerce.onlineshopping.service.AuthService;
+import org.junit.jupiter.api.Test;
+import org.mockito.Mockito;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.http.MediaType;
+import org.springframework.test.web.servlet.MockMvc;
+
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+
+@WebMvcTest(AuthController.class)
+class AuthControllerTest {
+
+    @Autowired
+    private MockMvc mockMvc;
+
+    @MockBean
+    private AuthService authService;
+
+    @Test
+    void testRegister() throws Exception {
+        User user = new User("John", "john@example.com", "password");
+        Mockito.when(authService.register(Mockito.any(User.class))).thenReturn(user);
+
+        mockMvc.perform(post("/auth/register")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"name\":\"John\",\"email\":\"john@example.com\",\"password\":\"password\"}"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.email").value("john@example.com"));
+    }
+
+    @Test
+    void testLogin() throws Exception {
+        Mockito.when(authService.login("john@example.com", "password")).thenReturn("jwt-token");
+
+        mockMvc.perform(post("/auth/login")
+                        .param("email", "john@example.com")
+                        .param("password", "password"))
+                .andExpect(status().isOk())
+                .andExpect(content().string("jwt-token"));
+    }
+}
+🔹 CartControllerTest.java
+(Already shown earlier, kept here for completeness)
+
+package com.wipro.ecommerce.onlineshopping.controller;
+
+import com.wipro.ecommerce.onlineshopping.entity.Cart;
+import com.wipro.ecommerce.onlineshopping.entity.Product;
+import com.wipro.ecommerce.onlineshopping.entity.User;
+import com.wipro.ecommerce.onlineshopping.service.CartService;
+import org.junit.jupiter.api.Test;
+import org.mockito.Mockito;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.http.MediaType;
+import org.springframework.test.web.servlet.MockMvc;
+
+import java.util.Collections;
+
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+
+@WebMvcTest(CartController.class)
+class CartControllerTest {
+
+    @Autowired
+    private MockMvc mockMvc;
+
+    @MockBean
+    private CartService cartService;
+
+    @Test
+    void testAddItem() throws Exception {
+        User user = new User("John", "john@example.com", "pass");
+        Product product = new Product();
+        product.setId(1L);
+
+        Cart cart = new Cart(user, product, 2);
+        Mockito.when(cartService.addItem(1L, 1L, 2)).thenReturn(cart);
+
+        mockMvc.perform(post("/cart")
+                        .param("userId", "1")
+                        .param("productId", "1")
+                        .param("quantity", "2"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.quantity").value(2));
+    }
+
+    @Test
+    void testGetUserCart() throws Exception {
+        Mockito.when(cartService.getUserCart(1L)).thenReturn(Collections.emptyList());
+
+        mockMvc.perform(get("/cart/1"))
+                .andExpect(status().isOk())
+                .andExpect(content().json("[]"));
+    }
+
+    @Test
+    void testUpdateQuantity() throws Exception {
+        User user = new User("John", "john@example.com", "pass");
+        Product product = new Product();
+        product.setId(1L);
+
+        Cart cart = new Cart(user, product, 5);
+        Mockito.when(cartService.updateQuantity(10L, 5)).thenReturn(cart);
+
+        mockMvc.perform(put("/cart/10").param("quantity", "5"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.quantity").value(5));
+    }
+
+    @Test
+    void testRemoveItem() throws Exception {
+        mockMvc.perform(delete("/cart/10"))
+                .andExpect(status().isOk())
+                .andExpect(content().string("Item removed from cart"));
+
+        Mockito.verify(cartService).removeItem(10L);
+    }
+}
+🔹 OrderControllerTest.java
+package com.wipro.ecommerce.onlineshopping.controller;
+
+import com.wipro.ecommerce.onlineshopping.entity.Order;
+import com.wipro.ecommerce.onlineshopping.service.OrderService;
+import org.junit.jupiter.api.Test;
+import org.mockito.Mockito;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.test.web.servlet.MockMvc;
+
+import java.util.Collections;
+
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+
+@WebMvcTest(OrderController.class)
+class OrderControllerTest {
+
+    @Autowired
+    private MockMvc mockMvc;
+
+    @MockBean
+    private OrderService orderService;
+
+    @Test
+    void testPlaceOrder() throws Exception {
+        Order order = new Order();
+        order.setId(1L);
+        Mockito.when(orderService.placeOrder(1L)).thenReturn(order);
+
+        mockMvc.perform(post("/orders/place").param("userId", "1"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.id").value(1L));
+    }
+
+    @Test
+    void testGetOrders() throws Exception {
+        Mockito.when(orderService.getOrders(1L)).thenReturn(Collections.emptyList());
+
+        mockMvc.perform(get("/orders/1"))
+                .andExpect(status().isOk())
+                .andExpect(content().json("[]"));
+    }
+}
+🔹 UserControllerTest.java
+package com.wipro.ecommerce.onlineshopping.controller;
+
+import com.wipro.ecommerce.onlineshopping.entity.User;
+import com.wipro.ecommerce.onlineshopping.service.UserService;
+import org.junit.jupiter.api.Test;
+import org.mockito.Mockito;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.http.MediaType;
+import org.springframework.test.web.servlet.MockMvc;
+
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+
+@WebMvcTest(UserController.class)
+class UserControllerTest {
+
+    @Autowired
+    private MockMvc mockMvc;
+
+    @MockBean
+    private UserService userService;
+
+    @Test
+    void testGetUser() throws Exception {
+        User user = new User("Alice", "alice@example.com", "1234");
+        user.setId(1L);
+        Mockito.when(userService.getUserById(1L)).thenReturn(user);
+
+        mockMvc.perform(get("/users/1"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.email").value("alice@example.com"));
+    }
+
+    @Test
+    void testUpdateUser() throws Exception {
+        User updated = new User("Alice", "alice@example.com", "newpass");
+        updated.setId(1L);
+        Mockito.when(userService.updateUser(Mockito.eq(1L), Mockito.any(User.class))).thenReturn(updated);
+
+        mockMvc.perform(put("/users/1")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"name\":\"Alice\",\"email\":\"alice@example.com\",\"password\":\"newpass\"}"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.password").value("newpass"));
+    }
+}
+🔹 ProductControllerTest.java
+package com.wipro.ecommerce.onlineshopping.controller;
+
+import com.wipro.ecommerce.onlineshopping.entity.Product;
+import com.wipro.ecommerce.onlineshopping.service.ProductService;
+import org.junit.jupiter.api.Test;
+import org.mockito.Mockito;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.http.MediaType;
+import org.springframework.test.web.servlet.MockMvc;
+
+import java.util.Collections;
+
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+
+@WebMvcTest(ProductController.class)
+class ProductControllerTest {
+
+    @Autowired
+    private MockMvc mockMvc;
+
+    @MockBean
+    private ProductService productService;
+
+    @Test
+    void testGetAllProducts() throws Exception {
+        Mockito.when(productService.getAllProducts()).thenReturn(Collections.emptyList());
+
+        mockMvc.perform(get("/products"))
+                .andExpect(status().isOk())
+                .andExpect(content().json("[]"));
+    }
+
+    @Test
+    void testAddProduct() throws Exception {
+        Product product = new Product();
+        product.setId(1L);
+        product.setName("Laptop");
+
+        Mockito.when(productService.addProduct(Mockito.any(Product.class))).thenReturn(product);
+
+        mockMvc.perform(post("/products")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"name\":\"Laptop\"}"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.name").value("Laptop"));
+    }
+}
+🔹 PaymentControllerTest.java
+package com.wipro.ecommerce.onlineshopping.controller;
+
+import com.wipro.ecommerce.onlineshopping.entity.Payment;
+import com.wipro.ecommerce.onlineshopping.service.PaymentService;
+import org.junit.jupiter.api.Test;
+import org.mockito.Mockito;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.test.web.servlet.MockMvc;
+
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+
+@WebMvcTest(PaymentController.class)
+class PaymentControllerTest {
+
+    @Autowired
+    private MockMvc mockMvc;
+
+    @MockBean
+    private PaymentService paymentService;
+
+    @Test
+    void testMakePayment() throws Exception {
+        Payment payment = new Payment();
+        payment.setId(1L);
+        payment.setStatus("SUCCESS");
+
+        Mockito.when(paymentService.makePayment(1L)).thenReturn(payment);
+
+        mockMvc.perform(post("/payment/1"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.status").value("SUCCESS"));
+    }
+}
+✅ These 6 test files will fully cover your controller endpoints with JUnit 5 + Mockito.
+
+Do you want me to also include a @SpringBootTest style integration test example (where it loads the whole Spring context, not just controllers), or keep only these unit-style controller tests?
+
+You said:
+package com.wipro.ecommerce.onlineshopping.service;
+
+import com.wipro.ecommerce.onlineshopping.dto.OrderDTO;
+import com.wipro.ecommerce.onlineshopping.dto.OrderItemDTO;
+import com.wipro.ecommerce.onlineshopping.dto.OrderItemRequest;
+import com.wipro.ecommerce.onlineshopping.entity.*;
+import com.wipro.ecommerce.onlineshopping.repository.*;
+
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.math.BigDecimal;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+
+@Service
+public class OrderService {
+
+    private final OrderRepository orderRepo;
+    private final UserRepository userRepo;
+    private final ProductRepository productRepo;
+    private final CartRepository cartRepo;
+
+    public OrderService(OrderRepository orderRepo,
+                        UserRepository userRepo,
+                        ProductRepository productRepo,
+                        CartRepository cartRepo) {
+        this.orderRepo = orderRepo;
+        this.userRepo = userRepo;
+        this.productRepo = productRepo;
+        this.cartRepo = cartRepo;
+    }
+
+    @Transactional
+    public Order placeOrder(Long userId, List<OrderItemRequest> items) {
+        User user = userRepo.findById(userId)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        BigDecimal total = BigDecimal.ZERO;
+        Set<OrderItem> orderItems = new HashSet<>();
+
+        for (OrderItemRequest req : items) {
+            Product product = productRepo.findById(req.getProductId())
+                    .orElseThrow(() -> new RuntimeException("Product not found: " + req.getProductId()));
+
+            OrderItem item = new OrderItem();
+            item.setProduct(product);
+            item.setQuantity(req.getQuantity());
+            BigDecimal lineTotal = product.getPrice().multiply(BigDecimal.valueOf(req.getQuantity()));
+            item.setPrice(lineTotal);
+
+            total = total.add(lineTotal);
+            orderItems.add(item);
+        }
+
+        Order order = new Order(user, total);
+        order.setOrderItems(orderItems);
+        orderItems.forEach(oi -> oi.setOrder(order));
+
+        Order savedOrder = orderRepo.save(order);
+
+        // Do NOT clear cart immediately; keep until payment success if needed
+        // cartRepo.deleteByUser(user);
+
+        return savedOrder;
+    }
+
+    public Page<OrderDTO> getUserOrders(Long userId, int page, int size) {
+        Pageable pageable = PageRequest.of(page, size);
+
+        // Fetch paginated orders from repo
+        Page<Order> ordersPage = orderRepo.findByUserId(userId, pageable);
+
+        // Map Orders to OrderDTOs
+        return ordersPage.map(order -> {
+            List<OrderItemDTO> items = order.getOrderItems().stream().map(oi -> {
+                // Ensure product is not null
+                var product = oi.getProduct();
+                return new OrderItemDTO(
+                    oi.getId(),
+                    product != null ? product.getId() : null,
+                    product != null ? product.getName() : "Unknown Product",
+                    product != null ? product.getImageUrl() : "",
+                    oi.getPrice(),
+                    oi.getQuantity()
+                );
+            }).toList();
+
+            return new OrderDTO(
+                order.getId(),
+                order.getTotalAmount(),
+                order.getStatus().name(),
+                order.getOrderDate(),
+                items
+            );
+        });
+    }
+
+    public List<Order> getAllOrders() {
+        return orderRepo.findAll();
+    }
+
+    @Transactional(readOnly = true)
+    public Order getOrderById(Long orderId) {
+        return orderRepo.findByIdWithItems(orderId)
+                .orElseThrow(() -> new RuntimeException("Order not found with ID: " + orderId));
+    }
+    
+    @Transactional
+    public Order updateOrderStatus(Long orderId, Order.OrderStatus status) {
+        Order order = orderRepo.findById(orderId)
+                .orElseThrow(() -> new RuntimeException("Order not found with ID: " + orderId));
+        order.setStatus(status);
+        return orderRepo.save(order);
+    }
+
+}
+ChatGPT said:
+Perfect 👍 You shared the OrderService implementation. To add JUnit 5 + Mockito tests, we’ll create a OrderServiceTest class that covers:
+
+Placing an order – success + product/user not found.
+
+Fetching user orders (paginated).
+
+Fetching all orders.
+
+Fetching order by ID – success + not found.
+
+Updating order status – success + not found.
+
+Here’s a full test class:
+
+package com.wipro.ecommerce.onlineshopping.service;
+
+import com.wipro.ecommerce.onlineshopping.dto.OrderDTO;
+import com.wipro.ecommerce.onlineshopping.dto.OrderItemRequest;
+import com.wipro.ecommerce.onlineshopping.entity.*;
+import com.wipro.ecommerce.onlineshopping.repository.*;
+
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.mockito.ArgumentCaptor;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
+import org.springframework.data.domain.*;
+
+import java.math.BigDecimal;
+import java.util.*;
+
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.*;
+
+class OrderServiceTest {
+
+    @Mock
+    private OrderRepository orderRepo;
+    @Mock
+    private UserRepository userRepo;
+    @Mock
+    private ProductRepository productRepo;
+    @Mock
+    private CartRepository cartRepo;
+
+    @InjectMocks
+    private OrderService orderService;
+
+    private User testUser;
+    private Product testProduct;
+
+    @BeforeEach
+    void setUp() {
+        MockitoAnnotations.openMocks(this);
+
+        testUser = new User();
+        testUser.setId(1L);
+
+        testProduct = new Product();
+        testProduct.setId(10L);
+        testProduct.setName("Test Product");
+        testProduct.setPrice(BigDecimal.valueOf(100));
+        testProduct.setImageUrl("test.jpg");
+    }
+
+    @Test
+    void testPlaceOrder_Success() {
+        OrderItemRequest request = new OrderItemRequest(10L, 2);
+
+        when(userRepo.findById(1L)).thenReturn(Optional.of(testUser));
+        when(productRepo.findById(10L)).thenReturn(Optional.of(testProduct));
+        when(orderRepo.save(any(Order.class))).thenAnswer(inv -> inv.getArgument(0));
+
+        Order result = orderService.placeOrder(1L, List.of(request));
+
+        assertNotNull(result);
+        assertEquals(BigDecimal.valueOf(200), result.getTotalAmount());
+        assertEquals(1, result.getOrderItems().size());
+
+        verify(orderRepo, times(1)).save(any(Order.class));
+    }
+
+    @Test
+    void testPlaceOrder_UserNotFound() {
+        when(userRepo.findById(99L)).thenReturn(Optional.empty());
+
+        RuntimeException ex = assertThrows(RuntimeException.class,
+                () -> orderService.placeOrder(99L, List.of()));
+
+        assertEquals("User not found", ex.getMessage());
+    }
+
+    @Test
+    void testPlaceOrder_ProductNotFound() {
+        when(userRepo.findById(1L)).thenReturn(Optional.of(testUser));
+        when(productRepo.findById(10L)).thenReturn(Optional.empty());
+
+        OrderItemRequest req = new OrderItemRequest(10L, 1);
+
+        RuntimeException ex = assertThrows(RuntimeException.class,
+                () -> orderService.placeOrder(1L, List.of(req)));
+
+        assertTrue(ex.getMessage().contains("Product not found"));
+    }
+
+    @Test
+    void testGetUserOrders_Success() {
+        Order order = new Order(testUser, BigDecimal.valueOf(500));
+        order.setId(1L);
+
+        OrderItem item = new OrderItem();
+        item.setId(101L);
+        item.setOrder(order);
+        item.setProduct(testProduct);
+        item.setPrice(BigDecimal.valueOf(100));
+        item.setQuantity(5);
+
+        order.setOrderItems(Set.of(item));
+
+        Page<Order> page = new PageImpl<>(List.of(order));
+        when(orderRepo.findByUserId(eq(1L), any(Pageable.class))).thenReturn(page);
+
+        Page<OrderDTO> result = orderService.getUserOrders(1L, 0, 10);
+
+        assertNotNull(result);
+        assertEquals(1, result.getTotalElements());
+        assertEquals("Test Product", result.getContent().get(0).getItems().get(0).getProductName());
+    }
+
+    @Test
+    void testGetAllOrders() {
+        Order order = new Order(testUser, BigDecimal.TEN);
+        when(orderRepo.findAll()).thenReturn(List.of(order));
+
+        List<Order> result = orderService.getAllOrders();
+
+        assertEquals(1, result.size());
+    }
+
+    @Test
+    void testGetOrderById_Success() {
+        Order order = new Order(testUser, BigDecimal.TEN);
+        order.setId(100L);
+
+        when(orderRepo.findByIdWithItems(100L)).thenReturn(Optional.of(order));
+
+        Order result = orderService.getOrderById(100L);
+
+        assertEquals(100L, result.getId());
+    }
+
+    @Test
+    void testGetOrderById_NotFound() {
+        when(orderRepo.findByIdWithItems(200L)).thenReturn(Optional.empty());
+
+        RuntimeException ex = assertThrows(RuntimeException.class,
+                () -> orderService.getOrderById(200L));
+
+        assertEquals("Order not found with ID: 200", ex.getMessage());
+    }
+
+    @Test
+    void testUpdateOrderStatus_Success() {
+        Order order = new Order(testUser, BigDecimal.TEN);
+        order.setId(1L);
+        order.setStatus(Order.OrderStatus.PENDING);
+
+        when(orderRepo.findById(1L)).thenReturn(Optional.of(order));
+        when(orderRepo.save(any(Order.class))).thenAnswer(inv -> inv.getArgument(0));
+
+        Order result = orderService.updateOrderStatus(1L, Order.OrderStatus.SHIPPED);
+
+        assertEquals(Order.OrderStatus.SHIPPED, result.getStatus());
+        verify(orderRepo, times(1)).save(order);
+    }
+
+    @Test
+    void testUpdateOrderStatus_NotFound() {
+        when(orderRepo.findById(5L)).thenReturn(Optional.empty());
+
+        RuntimeException ex = assertThrows(RuntimeException.class,
+                () -> orderService.updateOrderStatus(5L, Order.OrderStatus.DELIVERED));
+
+        assertEquals("Order not found with ID: 5", ex.getMessage());
+    }
+}
+✅ This test class covers all main scenarios for OrderService.
+Would you like me to also generate integration tests (@SpringBootTest with H2 DB) for end-to-end validation, or just keep these unit tests with mocks?
+
+
+
+
+No file chosenNo file chosen
+ChatGPT can make mistakes. Check important info. See Cookie Preferences.

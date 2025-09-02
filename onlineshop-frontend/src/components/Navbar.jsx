@@ -15,6 +15,8 @@ const Navbar = () => {
     navigate("/login");
   };
 
+  const isAdmin = user?.role?.toLowerCase() === "admin";
+
   return (
     <nav style={{ background: "#fff", borderBottom: "1px solid #eee", padding: "10px 40px" }}>
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
@@ -33,9 +35,7 @@ const Navbar = () => {
             
             {/* Profile */}
             <div style={{ position: "relative", cursor: "pointer" }}>
-              <div onClick={() => setShowMenu(!showMenu)}>
-                👤 Profile
-              </div>
+              <div onClick={() => setShowMenu(!showMenu)}>👤 Profile</div>
 
               {showMenu && (
                 <div style={{
@@ -50,12 +50,21 @@ const Navbar = () => {
                     {user?.email}
                   </p>
 
-                  <div
-                    onClick={() => navigate("/my-orders")}
-                    style={{ padding: "8px 12px", cursor: "pointer", color: "#333" }}
-                  >
-                    My Orders
-                  </div>
+                  {isAdmin ? (
+                    <div
+                      onClick={() => navigate("/admin/dashboard")}
+                      style={{ padding: "8px 12px", cursor: "pointer", color: "#333" }}
+                    >
+                      Dashboard
+                    </div>
+                  ) : (
+                    <div
+                      onClick={() => navigate("/my-orders")}
+                      style={{ padding: "8px 12px", cursor: "pointer", color: "#333" }}
+                    >
+                      My Orders
+                    </div>
+                  )}
 
                   <button 
                     onClick={handleLogout}
@@ -67,24 +76,24 @@ const Navbar = () => {
               )}
             </div>
 
-            {/* Wishlist */}
-            <Link to="/wishlist" style={{ textDecoration: "none", color: "#333" }}>
-              ❤️ Wishlist
-            </Link>
-
-            {/* Bag */}
-            <Link to="/cart" style={{ textDecoration: "none", color: "#333", position: "relative" }}>
-              🛍️ Bag
-              {cartCount > 0 && (
-                <span style={{
-                  position: "absolute", top: -8, right: -12,
-                  background: "red", color: "#fff", fontSize: "12px",
-                  borderRadius: "50%", padding: "2px 6px", fontWeight: "bold"
-                }}>
-                  {cartCount}
-                </span>
-              )}
-            </Link>
+            {/* Only show for non-admin users */}
+            {!isAdmin && (
+              <>
+                <Link to="/wishlist" style={{ textDecoration: "none", color: "#333" }}>❤️ Wishlist</Link>
+                <Link to="/cart" style={{ textDecoration: "none", color: "#333", position: "relative" }}>
+                  🛍️ Bag
+                  {cartCount > 0 && (
+                    <span style={{
+                      position: "absolute", top: -8, right: -12,
+                      background: "red", color: "#fff", fontSize: "12px",
+                      borderRadius: "50%", padding: "2px 6px", fontWeight: "bold"
+                    }}>
+                      {cartCount}
+                    </span>
+                  )}
+                </Link>
+              </>
+            )}
           </div>
         ) : (
           <div style={{ display: "flex", gap: "20px" }}>

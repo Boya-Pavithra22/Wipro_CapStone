@@ -37,17 +37,7 @@ public class OrderController {
         }
     }
 
-//    @GetMapping("/{userId}")
-//    public ResponseEntity<?> getUserOrders(@PathVariable Long userId) {
-//        try {
-//            List<OrderDTO> orders = orderService.getUserOrders(userId); // returns DTOs now
-//            return ResponseEntity.ok(orders);
-//        } catch (Exception e) {
-//            e.printStackTrace();
-//            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-//                                 .body("Failed to fetch orders for userId: " + userId);
-//        }
-//    }
+
     
     
     @GetMapping("/{userId}")

@@ -5,46 +5,58 @@ import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import io.swagger.v3.oas.annotations.media.Schema;
+
 import java.util.HashSet;
 import java.util.Set;
 
-
 @Entity
 @Table(name = "users")
+@Schema(description = "Represents a user in the online shopping system")
 public class User {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Schema(description = "Unique identifier of the user", example = "101")
     private Long id;
 
     @NotBlank
     @Size(max = 100)
+    @Schema(description = "Full name of the user", example = "John Doe")
     private String name;
 
     @NotBlank
     @Email
     @Size(max = 100)
     @Column(unique = true)
+    @Schema(description = "Email address of the user", example = "john.doe@example.com")
     private String email;
 
     @NotBlank
     @Size(max = 255)
     @JsonIgnore
+    @Schema(description = "Hashed password of the user", example = "$2a$10$encryptedPasswordHash", accessMode = Schema.AccessMode.WRITE_ONLY)
     private String password;
 
     @Enumerated(EnumType.STRING)
+    @Schema(description = "Role of the user", example = "CUSTOMER")
     private Role role = Role.CUSTOMER;
 
+    @Schema(description = "Residential address of the user", example = "123 MG Road, Bangalore")
     private String address;
-    
+
     @Size(max = 20)
+    @Schema(description = "Phone number of the user", example = "+91-9876543210")
     private String phone;
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     @JsonIgnore
+    @Schema(description = "List of cart items belonging to the user (ignored in API docs)")
     private Set<Cart> cartItems = new HashSet<>();
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     @JsonIgnore
+    @Schema(description = "List of orders placed by the user (ignored in API docs)")
     private Set<Order> orders = new HashSet<>();
 
     // Constructors

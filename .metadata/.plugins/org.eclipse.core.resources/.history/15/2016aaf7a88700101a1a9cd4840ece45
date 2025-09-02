@@ -1,0 +1,105 @@
+package com.wipro.ecommerce.onlineshopping.controller;
+
+import com.wipro.ecommerce.onlineshopping.entity.*;
+import com.wipro.ecommerce.onlineshopping.repository.*;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.web.bind.annotation.*;
+
+import java.math.BigDecimal;
+import java.util.*;
+
+@RestController
+@RequestMapping("/admin")
+@PreAuthorize("hasRole('ADMIN')")
+public class AdminDashboardController {
+
+    @Autowired
+    private UserRepository userRepository;
+
+    @Autowired
+    private OrderRepository orderRepository;
+
+    @Autowired
+    private ProductRepository productRepository;
+
+    @Autowired
+    private CategoryRepository categoryRepository;
+
+    @GetMapping("/dashboard/summary")
+    public ResponseEntity<Map<String, Object>> getDashboardSummary() {
+        long totalUsers = userRepository.count();
+        long totalOrders = orderRepository.count();
+        long totalProducts = productRepository.count();
+        BigDecimal totalRevenue = orderRepository.findAll().stream()
+                .map(Order::getTotalAmount)
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
+
+        Map<String, Object> summary = new HashMap<>();
+        summary.put("totalUsers", totalUsers);
+        summary.put("totalOrders", totalOrders);
+        summary.put("totalProducts", totalProducts);
+        summary.put("totalRevenue", totalRevenue);
+
+        return ResponseEntity.ok(summary);
+    }
+
+    // ✅ Manage Users
+    @GetMapping("/users")
+    public ResponseEntity<List<User>> getAllUsers() {
+        return ResponseEntity.ok(userRepository.findAll());
+    }
+
+    // ✅ Manage Orders
+    @GetMapping("/orders")
+    public ResponseEntity<List<Order>> getAllOrders() {
+        return ResponseEntity.ok(orderRepository.findAll());
+    }
+
+    // ✅ Manage Products
+    @GetMapping("/products")
+    public ResponseEntity<List<Product>> getAllProducts() {
+        return ResponseEntity.ok(productRepository.findAll());
+    }
+
+    @PostMapping("/products")
+    public ResponseEntity<Product> addProduct(@RequestBody Product product) {
+        return ResponseEntity.ok(productRepository.save(product));
+    }
+
+    @PutMapping("/products/{id}")
+    public ResponseEntity<Product> updateProduct(@PathVariable Long id, @RequestBody Product updatedProduct) {
+        return productRepository.findById(id).map(product -> {
+            product.setName(updatedProduct.getName());
+            product.setDescription(updatedProduct.getDescription());
+            product.setPrice(updatedProduct.getPrice());
+            product.setStock(updatedProduct.getStock());
+            product.setImageUrl(updatedProduct.getImageUrl());
+            return ResponseEntity.ok(productRepository.save(product));
+        }).orElse(ResponseEntity.notFound().build());
+    }
+
+    @DeleteMapping("/products/{id}")
+    public ResponseEntity<Void> deleteProduct(@PathVariable Long id) {
+        if (!productRepository.existsById(id)) {
+            return ResponseEntity.notFound().build();
+        }
+        productRepository.deleteById(id);
+        return ResponseEntity.noContent().build();
+    }
+
+    @PostMapping("/categories")
+    public ResponseEntity<Category> addCategory(@RequestBody Category category) {
+        return ResponseEntity.ok(categoryRepository.save(category));
+    }
+
+    @DeleteMapping("/categories/{id}")
+    public ResponseEntity<Void> deleteCategory(@PathVariable Long id) {
+        if (!categoryRepository.existsById(id)) {
+            return ResponseEntity.notFound().build();
+        }
+        categoryRepository.deleteById(id);
+        return ResponseEntity.noContent().build();
+    }
+}

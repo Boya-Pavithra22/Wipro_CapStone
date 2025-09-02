@@ -1,115 +1,129 @@
+/* Product Grid */
 .product-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
-  gap: 20px;
+  gap: 24px;
   padding: 20px 0;
 }
 
+/* Product Card */
 .product-card {
-  border: 1px solid #ddd;
-  border-radius: 8px;
+  border-radius: 16px;
   overflow: hidden;
-  background: #fff;
-  transition: transform 0.2s, box-shadow 0.2s;
+  background: rgba(255, 255, 255, 0.8);
+  backdrop-filter: blur(8px);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  cursor: pointer;
 }
 
 .product-card:hover {
-  transform: scale(1.03);
-  box-shadow: 0 4px 12px rgba(0,0,0,0.12);
+  transform: translateY(-6px) scale(1.02);
+  box-shadow: 0 8px 20px rgba(255, 62, 108, 0.25);
 }
 
+/* Product Image */
 .product-image {
   width: 100%;
-  height: 250px;
+  height: 230px;
   object-fit: cover;
-  cursor: pointer;
+  transition: transform 0.3s ease;
 }
 
+.product-card:hover .product-image {
+  transform: scale(1.05);
+}
+
+/* Product Info */
 .product-info {
-  padding: 10px;
+  padding: 14px;
 }
 
 .product-name {
-  font-size: 16px;
-  font-weight: bold;
-  margin-bottom: 5px;
+  font-size: 17px;
+  font-weight: 600;
+  margin-bottom: 6px;
+  color: #222;
 }
 
 .product-price {
-  margin: 5px 0;
-  color: #555;
+  margin: 6px 0;
+  font-size: 15px;
+  font-weight: 500;
+  color: #ff3e6c;
 }
 
+/* Add to Cart Button (customer only) */
 .add-btn {
   width: 100%;
   padding: 10px;
-  background: #ff3e6c;
+  background: linear-gradient(135deg, #ff3e6c, #ff8e53);
   color: #fff;
   border: none;
-  border-radius: 4px;
+  border-radius: 6px;
   cursor: pointer;
-  font-weight: bold;
-  transition: background 0.2s, transform 0.2s, box-shadow 0.2s;
+  font-weight: 600;
+  transition: transform 0.25s, box-shadow 0.25s;
 }
 
 .add-btn:hover {
-  background: #e7325c;
-  transform: scale(1.05);
-  box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+  transform: translateY(-2px) scale(1.04);
+  box-shadow: 0 6px 14px rgba(255, 62, 108, 0.35);
 }
 
-/* Pagination buttons */
-.page-btn {
-  padding: 8px 12px;
-  margin: 0 5px;
-  border: 1px solid #ddd;
-  border-radius: 4px;
-  background: #fff;
+/* Admin Add Category Tile */
+.add-category-tile {
+  margin-top: 20px;
+  padding: 18px;
+  text-align: center;
+  border-radius: 16px;
+  background: linear-gradient(135deg, #ff3e6c, #ff8e53);
+  color: #fff;
+  font-weight: 600;
+  font-size: 16px;
   cursor: pointer;
-  font-weight: bold;
+  transition: transform 0.25s ease, box-shadow 0.25s ease;
 }
 
-.page-btn:disabled {
-  cursor: not-allowed;
-  opacity: 0.5;
+.add-category-tile:hover {
+  transform: translateY(-4px) scale(1.05);
+  box-shadow: 0 6px 16px rgba(255, 62, 108, 0.4);
 }
 
-
+/* Pagination */
 .page-btn {
-  padding: 8px 12px;
-  margin: 0 5px;
-  border: 1px solid #ddd;
-  border-radius: 4px;
-  background: #fff;
+  padding: 8px 14px;
+  margin: 0 6px;
+  border: none;
+  border-radius: 6px;
+  background: #ff3e6c;
+  color: #fff;
   cursor: pointer;
-  font-weight: bold;
-  transition: background 0.2s, transform 0.2s;
+  font-weight: 600;
+  transition: background 0.25s ease, transform 0.25s ease;
 }
 
 .page-btn:hover:not(:disabled) {
-  background: #ff3e6c;
-  color: #fff;
-  transform: scale(1.05);
+  background: #e7325c;
+  transform: scale(1.08);
 }
 
 .page-btn:disabled {
+  background: #ccc;
   cursor: not-allowed;
-  opacity: 0.5;
 }
 
-
-/* Toast */
+/* Toast Notification */
 .toast {
   position: fixed;
-  bottom: 20px;
+  top: 20px;
   right: 20px;
+  padding: 14px 22px;
   background: #4caf50;
   color: #fff;
-  padding: 12px 20px;
-  border-radius: 6px;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.2);
-  opacity: 0;
-  animation: fadein 0.3s forwards, fadeout 0.3s 2.7s forwards;
+  border-radius: 8px;
+  box-shadow: 0 4px 14px rgba(0,0,0,0.25);
+  animation: slideIn 0.4s ease forwards, fadeout 0.4s 2.6s forwards;
   z-index: 1000;
 }
 
@@ -117,28 +131,32 @@
   background: #f44336;
 }
 
-@keyframes fadein {
-  from { opacity: 0; transform: translateY(20px); }
+/* Toast Animations */
+@keyframes slideIn {
+  from { opacity: 0; transform: translateY(-20px); }
   to { opacity: 1; transform: translateY(0); }
 }
 
 @keyframes fadeout {
   from { opacity: 1; transform: translateY(0); }
-  to { opacity: 0; transform: translateY(20px); }
+  to { opacity: 0; transform: translateY(-20px); }
 }
 
-/* Page buttons */
-.page-btn {
-  padding: 8px 12px;
-  margin: 0 5px;
-  background: #ff3e6c;
+.manage-btn {
+  background: linear-gradient(90deg, #ff6a00, #ee0979);
   color: #fff;
   border: none;
-  border-radius: 4px;
+  padding: 8px 14px;
+  border-radius: 20px;
+  font-size: 13px;
+  font-weight: bold;
   cursor: pointer;
+  margin-top: 8px;
+  transition: all 0.3s ease;
+  width: 100%;
 }
 
-.page-btn:disabled {
-  background: #ccc;
-  cursor: not-allowed;
+.manage-btn:hover {
+  transform: scale(1.05);
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
 }
